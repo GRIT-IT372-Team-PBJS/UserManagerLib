@@ -38,7 +38,8 @@ class User
     }
 
     /**
-     * @return mixed
+     * Returns the First name of the user.
+     * @return String
      */
     public function getFirstName()
     {
@@ -46,7 +47,8 @@ class User
     }
 
     /**
-     * @param mixed $firstName
+     * Sets the FIRST name of the user.
+     * @param String $firstName
      */
     public function setFirstName($firstName)
     {
@@ -54,7 +56,8 @@ class User
     }
 
     /**
-     * @return mixed
+     * Returns the LAST name of the user.
+     * @return String
      */
     public function getLastName()
     {
@@ -62,7 +65,8 @@ class User
     }
 
     /**
-     * @param mixed $lastName
+     * Sets the LAST name of the user.
+     * @param String $lastName
      */
     public function setLastName($lastName)
     {
@@ -70,7 +74,8 @@ class User
     }
 
     /**
-     * @return mixed
+     * Returns MIDDLE name of the user.
+     * @return String (can be an empty string)
      */
     public function getMiddleName()
     {
@@ -78,7 +83,8 @@ class User
     }
 
     /**
-     * @param mixed $middleName
+     * Sets MIDDLE name of the user.
+     * @param String $middleName (can be an empty string)
      */
     public function setMiddleName($middleName)
     {
@@ -86,7 +92,8 @@ class User
     }
 
     /**
-     * @return mixed
+     * Returns EMAIL of the user.
+     * @return String
      */
     public function getEmail()
     {
@@ -94,7 +101,8 @@ class User
     }
 
     /**
-     * @param mixed $email
+     * Sets EMAIL of the user.
+     * @param String $email
      */
     public function setEmail($email)
     {
@@ -102,7 +110,8 @@ class User
     }
 
     /**
-     * @return mixed
+     * Returns USERID of the user.
+     * @return Integer
      */
     public function getUserId()
     {
@@ -110,15 +119,8 @@ class User
     }
 
     /**
-     * @param mixed $userId
-     */
-    public function setUserId($userId)
-    {
-        $this->userId = $userId;
-    }
-
-    /**
-     * @return mixed
+     * Returns REGISTERED SITES of user.
+     * @return Array of Strings
      */
     public function getRegisteredSites()
     {
@@ -126,7 +128,8 @@ class User
     }
 
     /**
-     * @param mixed $registeredSites
+     * Sets REGISTERED SITES of user.
+     * @param Array of Strings $registeredSites
      */
     public function setRegisteredSites($registeredSites)
     {
@@ -134,7 +137,8 @@ class User
     }
 
     /**
-     * @return mixed
+     * Returns TYPE of user.
+     * @return AuthType (enum)
      */
     public function getType()
     {
@@ -142,7 +146,8 @@ class User
     }
 
     /**
-     * @param mixed $type
+     * Sets Type of User.
+     * @param AuthType (enum) $type
      */
     public function setType($type)
     {
