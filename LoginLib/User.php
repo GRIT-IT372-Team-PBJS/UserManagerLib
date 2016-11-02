@@ -48,11 +48,20 @@ class User
 
     /**
      * Sets the FIRST name of the user.
+     * Returns true if set was successful (valid).
+     * Returns false if set was unsuccessful (invalid).
      * @param String $firstName
+     * @return Boolean
      */
     public function setFirstName($firstName)
     {
-        $this->firstName = $firstName;
+        if ($this->isValidName($firstName)) {
+            $this->firstName = $firstName;
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
     /**
@@ -66,11 +75,19 @@ class User
 
     /**
      * Sets the LAST name of the user.
+     * Returns true if set was successful (valid).
+     * Returns false if set was unsuccessful (invalid).
      * @param String $lastName
+     * @return Boolean
      */
     public function setLastName($lastName)
     {
-        $this->lastName = $lastName;
+        if ($this->isValidName($lastName)) {
+            $this->lastName = $lastName;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -84,11 +101,19 @@ class User
 
     /**
      * Sets MIDDLE name of the user.
+     * Returns true if set was successful (valid).
+     * Returns false if set was unsuccessful (invalid).
      * @param String $middleName (can be an empty string)
+     * @return Boolean
      */
     public function setMiddleName($middleName)
     {
-        $this->middleName = $middleName;
+        if ($this->isValidName($middleName)) {
+            $this->lastName = $middleName;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -102,11 +127,22 @@ class User
 
     /**
      * Sets EMAIL of the user.
+     * Checks if $email is valid
+     * Returns true if set was successful (valid).
+     * Returns false if set was unsuccessful (invalid).
      * @param String $email
+     * @return Boolean
      */
     public function setEmail($email)
     {
-        $this->email = $email;
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->email = $email;
+            return true;
+        } else {
+            echo "Error from User class: setRegisteredSites(\$email): your variable \$email is not an valid email.";
+            return false;
+        }
+
     }
 
     /**
@@ -129,11 +165,22 @@ class User
 
     /**
      * Sets REGISTERED SITES of user.
+     * Checks if $registeredSites is a valid array.
+     * Returns true if set was successful (valid).
+     * Returns false if set was unsuccessful (invalid).
      * @param Array of Strings $registeredSites
+     * @return Boolean
      */
     public function setRegisteredSites($registeredSites)
     {
-        $this->registeredSites = $registeredSites;
+        if (is_array($registeredSites)) {
+            $this->registeredSites = $registeredSites;
+            return true;
+        } else {
+            echo "Error from User class: setRegisteredSites(\$registeredSites): your variable \$registeredSites is not an array.";
+            return false;
+        }
+
     }
 
     /**
@@ -147,11 +194,32 @@ class User
 
     /**
      * Sets Type of User.
+     * Checks if AuthType is valid.
+     * Returns true if set was successful (valid).
+     * Returns false if set was unsuccessful (invalid).
      * @param AuthType (enum) $type
+     * @return Boolean
      */
     public function setType($type)
     {
-        $this->type = $type;
+        if (AuthType::$type == $type) {
+            $this->type = AuthType::$type;
+            return true;
+        } else {
+            echo "Error from User class: setType(\$type): Your variable \$type is an invalid type.";
+            return false;
+        }
+
+    }
+
+    /**
+     * checks if name has no numeric or special characters except for -
+     * @param $name
+     * @return bool
+     */
+    private function isValidName($name)
+    {
+        return ctype_alpha(str_replace("-", "", $name));
     }
 
 
