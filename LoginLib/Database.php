@@ -8,41 +8,19 @@
  */
 
 /**
- * This is a singleton database class. Singleton means that there
- * is only one instance of the class at all times.
+ * Class Database (Singleton)
+ *
+ * This class manages the database connection on all sites that use it
+ * and make sure there is only one instance of it at all times.
  */
 class Database
 {
     private static $instance = null;
     private $databaseConnection;
 
-    private static function getInstance()
-    {
-
-        if (self::$instance == null) {
-            self::$instance = new Database();
-        }
-
-        return self::$instance;
-    }
-
-    private static function initializeConnection()
-    {
-
-        $dbHost = "";
-        $dbName = "";
-        $dbUsername = "";
-        $dbPassword = "";
-
-        $db = self::getInstance();
-        $db->databaseConnection = new PDO("mysql:host=" . $dbHost . "; dbname=" . $dbName . "", "" . $dbUsername . "", "" . $dbPassword . "");
-        return $db;
-
-    }
-
     /**
      * Gets the database connection.
-     * @return a database connection.
+     * @return Database
      */
     public static function getDBConnection()
     {
@@ -62,5 +40,32 @@ class Database
     {
         $db = self::getInstance();
         $db->databaseConnection = null;
+    }
+
+    private static function getInstance()
+    {
+
+        if (self::$instance == null) {
+            self::$instance = new Database();
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * Initializes the connection.
+     * @return PDO
+     */
+    private static function initializeConnection()
+    {
+        //Set database credentials here.
+        $databaseHost = "";
+        $databaseName = "";
+        $databaseUsername = "";
+        $databasePassword = "";
+
+        $db = self::getInstance();
+        return $db->databaseConnection = new PDO("mysql:host=" . $databaseHost . "; dbname=" . $databaseName . "", "" . $databaseUsername . "", "" . $databasePassword . "");
+
     }
 }
