@@ -6,6 +6,11 @@
  * Date: 11/1/2016
  * Time: 3:21 PM
  */
+
+/**
+ * Class User
+ * This class is used to pass user data around and check if data is valid before it is set into the user object.
+ */
 class User
 {
     private $firstName;
