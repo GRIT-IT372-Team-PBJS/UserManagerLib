@@ -1,7 +1,5 @@
 <?php
 
-//TODO add include from the other classes.
-
 require_once 'Database.php';
 require_once 'Authentication.php';
 require_once 'User.php';
@@ -20,57 +18,92 @@ public function __construct(){
   $this->currentUser = Authentication::getCurrentUser();
 }
 
-//Unsure if we are using the previous user table or making a new one. Clarification from group needed.
+  /**
+   * This class edits the first name field in the database.
+   * Returns True if the method was successful.
+   * Returns False if the method was unsuccessful.
+   * @param $newFirstName : String input
+   * @return Boolean
+   */
 public function editFirstName($newFirstName){
+
   if($this->currentUser->isValidName($newFirstName)){
     $sql = "UPDATE tb_users SET firstname = :firstname WHERE user_id = :user_id";
-    $statement = $this->dbConnection->prepare($sql);
-    $statement->bindParam(":firstname", $newFirstName, PDO::PARAM_STR);
-    $statement->bindParam(":user_id", $this->currentUser->getUserId, PDO::PARAM_INT);
-    $statement->execute();
+    $fieldToBeUpdated = ":email";
+    $this->updateUserData($sql, $fieldToBeUpdated, $$newFirstName);
+
     return true;
   }else {
     return false;
   }
 }
 
+  /**
+   * This method edits the last name field in the database.
+   * Returns True if the method was successful.
+   * Returns False if the method was unsuccessful.
+   * @param $newLastName : String input
+   * @return Boolean
+   */
 public function editLastName($newLastName){
+
   if($this->currentUser->isValidName($newLastName)){
     $sql = "UPDATE tb_users SET lastname = :lastname WHERE user_id = :user_id";
-    $statement = $this->dbConnection->prepare($sql);
-    $statement->bindParam(":lastname", $newLastName, PDO::PARAM_STR);
-    $statement->bindParam(":user_id", $this->currentUser->getUserId, PDO::PARAM_INT);
-    $statement->execute();
+    $fieldToBeUpdated = ":lastname";
+    $this->updateUserData($sql, $fieldToBeUpdated, $newLastName);
+
     return true;
   }else {
     return false;
   }
 }
 
+  /**
+   * This method edits the middle name field in the db.
+   * Returns True if the method was successful.
+   * Returns False if the method was unsuccessful.
+   * @param $newMiddleName : String
+   * @return Boolean
+   */
 public function editMiddleName($newMiddleName){
+
   if($this->currentUser->isValidName($newMiddleName)){
     $sql = "UPDATE tb_users SET middlename = :middlename WHERE user_id = :user_id";
-    $statement = $this->dbConnection->prepare($sql);
-    $statement->bindParam(":middlename", $newMiddleName, PDO::PARAM_STR);
-    $statement->bindParam(":user_id", $this->currentUser->getUserId, PDO::PARAM_INT);
-    $statement->execute();
+    $fieldToBeUpdated = ":middlename";
+    $this->updateUserData($sql, $fieldToBeUpdated, $newMiddleName);
+
     return true;
   }else {
     return false;
   }
 }
 
+    /**
+     * This method edits the email field in the database.
+     * Returns True if the method was successful.
+     * Returns False if the method was unsuccessful.
+     * @param $newEmail : String
+     * @return Boolean
+     */
 public function editEmail($newEmail){
+
   if(filter_var($newEmail, FILTER_VALIDATE_EMAIL)){
     $sql = "UPDATE tb_users SET email = :email WHERE user_id = :user_id";
-    $statement = $this->dbConnection->prepare($sql);
-    $statement->bindParam(":email", $newEmail, PDO::PARAM_STR);
-    $statement->bindParam(":user_id", $this->currentUser->getUserId, PDO::PARAM_INT);
-    $statement->execute();
+    $fieldToBeUpdated = ":email";
+    $this->updateUserData($sql, $fieldToBeUpdated, $newEmail);
+
     return true;
   }else {
     return false;
   }
+}
+
+private function updateUserData($sql, $fieldToBeUpdated, $valueOfField) {
+
+  $statement = $this->dbConnection->prepare($sql);
+  $statement->bindParam($fieldToBeUpdated, $valueOfField, PDO::PARAM_STR);
+  $statement->bindParam(":user_id", $this->currentUser->getUserId, PDO::PARAM_INT);
+  $statement->execute();
 }
 
 }
