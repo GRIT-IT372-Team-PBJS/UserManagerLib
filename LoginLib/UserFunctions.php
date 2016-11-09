@@ -57,7 +57,7 @@ public function editMiddleName($newMiddleName){
 }
 
 public function editEmail($newEmail){
-  if($currentUser->isValidName($newEmail)){
+  if(filter_var($newEmail, FILTER_VALIDATE_EMAIL)){
     $sql = "UPDATE tb_users SET email = :email WHERE user_id = :user_id";
     $statement = $this->$dbConnection->prepare($sql);
     $statement->bindParam(":email", $newEmails, PDO::PARAM_STR);
