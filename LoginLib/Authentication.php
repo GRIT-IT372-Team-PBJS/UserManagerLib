@@ -39,7 +39,7 @@ class Authentication
     {
         self::initializeAuthentication();
 
-        if (!self::isLoggedIn()) {
+        if (!self::isLoggedIn() && self::isRegisteredToCurrentSite()) {
 
             $result = self::fetchUserDataFromDB($postEmail);
 
@@ -48,7 +48,6 @@ class Authentication
                 self::setCurrentUser($result["first_name"], $result["middle_name"], $result["last_name"], $result["email"], $result["user_id"], $result["registered_sites"], $result["auth_type"]);
                 self::setUserSession($result);
                 self::closeDBConnection();
-
                 return true;
 
             } else {
@@ -58,7 +57,9 @@ class Authentication
             }
 
         } else {
+
             return false;
+
         }
     }
 
@@ -263,6 +264,11 @@ class Authentication
     {
         $auth = self::getInstance();
         $auth->databaseConnection = Database::getDBConnection();
+
+    }
+
+    private  static function isRegisteredToCurrentSite(){
+
 
     }
 

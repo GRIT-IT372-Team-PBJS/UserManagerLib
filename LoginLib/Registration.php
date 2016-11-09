@@ -13,33 +13,77 @@ require_once "Database.php";
 class Registration
 {
     private $db;
-    private $registeredUser;
 
-    public static function registerUser($firstName, $middleName, $lastName, $email, $registeredSite, $type){
-        if(self::userExists($email)){
-            self::registerUserToSite($email, $registeredSite);
+    public static function registerUser($firstName, $middleName, $lastName, $email, $currentSite, $type, $password)
+    {
+        if (self::userExists($email)) {
+
+            self::registerUserToSite($email, $currentSite);
+            return true;
+
         } else {
-            self::addNewUserToDB($firstName, $middleName, $lastName, $email, $registeredSite, $type);
-            self::getUserId();
+
+            if (self::isAllIncomingDataValid()) {
+
+                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                    self::addNewUserToDB($firstName, $middleName, $lastName, $email, $currentSite, $type, $hashedPassword);
+                    return true;
+
+            } else {
+
+                return false;
+
+            }
+
         }
     }
 
-    private static function userExists($email) {
-
+    private static function userExists($email)
+    {
 
 
     }
-
+    
 
     private static function registerUserToSite($email, $registeredSite) {
         return true;
     }
 
-    private static function getUserId() {
+    private static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type)
+    {
+        $registeredUser = new User();
 
+        //if all user data is valid return true.
+        if ($registeredUser->setFirstName($firstName) &
+            $registeredUser->setLastName($lastName) &
+            $registeredUser->setMiddleName($middleName) &
+            $registeredUser->setEmail($email) &
+            $registeredUser->setRegisteredSites(self::addStringToNewArray($currentSite)) &
+            $registeredUser->setType($type)
+        ) {
+
+            return true;
+
+        } else {
+
+            return false;
+
+        }
     }
 
-    private static function addNewUserToDB($firstName, $middleName, $lastName, $email, $registeredSite, $type) {
-
+    private static function addStringToNewArray($currentSite)
+    {
+        $currentSiteArr = [];
+        $currentSiteArr[0] = $currentSite;
+        return $currentSiteArr;
     }
+
+    private static function getDBConnection(){
+        return self::$db = Database::getDBConnection();
+    }
+
+    private static function closeDBConnection(){
+        Database::closeDBConnection();
+        }
+
 }
