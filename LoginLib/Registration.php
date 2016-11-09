@@ -30,8 +30,9 @@ class Registration
 
     }
 
-    private static function registerUserToSite($email, $registeredSite) {
 
+    private static function registerUserToSite($email, $registeredSite) {
+        return true;
     }
 
     private static function getUserId() {
