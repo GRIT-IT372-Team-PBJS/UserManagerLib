@@ -43,7 +43,7 @@ class Registration
 
 
     }
-    
+
 
     private static function registerUserToSite($email, $registeredSite) {
         return true;

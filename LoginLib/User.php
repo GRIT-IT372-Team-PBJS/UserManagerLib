@@ -222,7 +222,7 @@ class User
      * @param $name
      * @return bool
      */
-    protected function isValidName($name)
+    public function isValidName($name)
     {
         return ctype_alpha(str_replace("-", "", $name));
     }
