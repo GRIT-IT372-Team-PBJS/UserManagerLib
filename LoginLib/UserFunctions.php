@@ -2,52 +2,72 @@
 
 //TODO add include from the other classes.
 
-class userFunctions{
+require_once 'Database.php';
+require_once 'Authentication.php';
+
+class UserFunctions{
 
 //Unsure of whether these are really necessary if we do use includes.
-private  var $db;
+private  var $dbConnection;
 private var $currentUser;
 
-//Added these for SQL UPDATE. May be made unnecessary further into development process.
-private var $newFirstName;
-private var $newLastName;
-private var $newMiddleName;
-private var $newEmail;
-
-if(isset($_POST["firstName"])){
-  $newFirstName = $_POST["firstName"];
-}
-
-if(isset($_POST["lastName"])){
-  $newLastName = $_POST["lastName"];
-}
-
-if(isset($_POST["middleName"])){
-  $newMiddleName = $_POST["middleName"];
-}
-
-if(isset($_POST["email"])){
-  $newEmail = $_POST["email"];
+public function __construct(){
+  $this->$dbConnection = Database::getDBConnection();
+  $this->$currentUser = Authentication::getCurrentUser();
 }
 
 //Unsure if we are using the previous user table or making a new one. Clarification from group needed.
 public function editFirstName($newFirstName){
-  $sql = "UPDATE tableName SET firstName = ".$newFirstName."WHERE id = ".$currentUser->id;
+  if($currentUser->isValidName($newFirstName)){
+    $sql = "UPDATE tb_users SET firstname = :firstname WHERE user_id = :user_id";
+    $statement = $this->$dbConnection->prepare($sql);
+    $statement->bindParam(":firstname", $newFirstName, PDO::PARAM_STR);
+    $statement->bindParam(":user_id", $currentUser->getUserId, PDO::PARAM_INT);
+    $statement->execute();
+    return true;
+  }else {
+    return false;
+  }
 }
 
 public function editLastName($newLastName){
-  $sql = "UPDATE tableName SET lastName = ".$newLastName."WHERE id = ".$currentUser->id;
+  if($currentUser->isValidName($newLastName)){
+    $sql = "UPDATE tb_users SET lastname = :lastname WHERE user_id = :user_id";
+    $statement = $this->$dbConnection->prepare($sql);
+    $statement->bindParam(":lastname", $newLastName, PDO::PARAM_STR);
+    $statement->bindParam(":user_id", $currentUser->getUserId, PDO::PARAM_INT);
+    $statement->execute();
+    return true;
+  }else {
+    return false;
+  }
 }
 
 public function editMiddleName($newMiddleName){
-  $sql = "UPDATE tableName SET lastName = ".$newMiddleName."WHERE id = ".$currentUser->id;
+  if($currentUser->isValidName($newMiddleName)){
+    $sql = "UPDATE tb_users SET middlename = :middlename WHERE user_id = :user_id";
+    $statement = $this->$dbConnection->prepare($sql);
+    $statement->bindParam(":middlename", $newMiddleName, PDO::PARAM_STR);
+    $statement->bindParam(":user_id", $currentUser->getUserId, PDO::PARAM_INT);
+    $statement->execute();
+    return true;
+  }else {
+    return false;
+  }
 }
 
 public function editEmail($newEmail){
-  $sql = "UPDATE tableName SET lastName = ".$newEmail."WHERE id = ".$currentUser->id;
+  if($currentUser->isValidName($newEmail)){
+    $sql = "UPDATE tb_users SET email = :email WHERE user_id = :user_id";
+    $statement = $this->$dbConnection->prepare($sql);
+    $statement->bindParam(":email", $newEmails, PDO::PARAM_STR);
+    $statement->bindParam(":user_id", $currentUser->getUserId, PDO::PARAM_INT);
+    $statement->execute();
+    return true;
+  }else {
+    return false;
+  }
 }
 
 }
-
-
- ?>
+?>
