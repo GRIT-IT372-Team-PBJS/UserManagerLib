@@ -33,9 +33,10 @@ class Authentication
      * @param $postEmail : Post data in the form of an email address.
      * @param $postPassword : Post data in the form of a password.
      * @param $currentSite : static input used to indicate which app user is trying to login to
+     * @param $authorizationType : This last parameter is optional, it allows you to set restrictions on what type of user can login.
      * @return Boolean
      */
-    public static function login($postEmail, $postPassword, $currentSite)
+    public static function login($postEmail, $postPassword, $currentSite, $authorizationType)
     {
         self::initializeAuthentication();
 
@@ -43,21 +44,38 @@ class Authentication
 
             $result = self::fetchUserDataFromDB($postEmail);
 
+            $middleName = isset($result["middlename"]) ? $result["middlename"] : "";
+            $firstName = isset($result["firstname"]) ? $result["firstname"] : "";
+            $lastName = isset($result["lastname"]) ? $result["lastname"] : "";
+            $emailName = isset($result["email"]) ?  $result["email"] : "";
+            $userId = isset($result["user_id"]) ? $result["user_id"] : "";
+            $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
+
             if (self::isRegisteredToCurrentSite($currentSite, $result["user_id"])) {
 
                 if (self::isPasswordValid($result, $postPassword)) {
 
-                    $middleName = isset($result["middlename"]) ? $result["middlename"] : "";
-                    $firstName = isset($result["firstname"]) ? $result["firstname"] : "";
-                    $lastName = isset($result["lastname"]) ? $result["lastname"] : "";
-                    $emailName = isset($result["email"]) ?  $result["email"] : "";
-                    $userId = isset($result["user_id"]) ? $result["user_id"] : "";
-                    $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
+                    if(func_num_args() < 4) {
 
-                    self::setCurrentUserSession($firstName, $middleName, $lastName, $emailName, $userId, $authType);
-                    Database::closeDBConnection();
+                        self::setCurrentUserSession($firstName, $middleName, $lastName, $emailName, $userId, $authType);
+                        Database::closeDBConnection();
 
-                    return true;
+                        return true;
+
+                    } else if(func_num_args() == 4) {
+
+                        if($authType == $authorizationType) {
+
+                            self::setCurrentUserSession($firstName, $middleName, $lastName, $emailName, $userId, $authType);
+                            Database::closeDBConnection();
+
+                            return true;
+
+                        } else {
+                            return false;
+                        }
+
+                    }
 
                 } else {
 
@@ -181,9 +199,15 @@ class Authentication
     {
         $currentUser = isset($_SESSION["auth-current-user"]) ? $_SESSION["auth-current-user"] : "";
         return $currentUser != "";
+
     }
 
-    public static function isValidUserOrRedirectTo($url) {
+    /**
+     * This method is use when you want to restrict a page to users who are not logged in.
+     * @param $url : This is the location you want the user to redirect to if they are not an authorized user.
+     * @param $authorizationType : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.
+     */
+    public static function isValidUserElseRedirectTo($url, $authorizationType) {
         if(self::isLoggedIn()){
 
             $userId = $_SESSION["auth-current-user"]->getUserId();
@@ -199,6 +223,14 @@ class Authentication
                 header("Location: " . $url);
             }
 
+            if (func_num_args() == 2) {
+
+                if ($_SESSION["auth-current-user"]->getType() == $authorizationType){
+                    header("Location: " . $url);
+                }
+
+            }
+
         } else {
             header("Location: " . $url);
         }
@@ -206,14 +238,13 @@ class Authentication
     }
 
     /**
-     * Hashes Password and then inserts and updates the current user's password in the database.
-     * @param $newPassword
+     * Hashes Password and then updates the current user's password in the database.
+     * @param $newPassword : The new password to be put into the database.
      */
     public static function changePassword($newPassword)
     {
-        if (self::getCurrentUser() != null) {
+        if (self::isLoggedIn()){
 
-            self::initializeAuthentication();
             self::updatePasswordInDB($newPassword);
             Database::closeDBConnection();
 
@@ -224,24 +255,17 @@ class Authentication
      * Updates the password in the database.
      * @param $newPassword
      */
-    private
-    static function updatePasswordInDB($newPassword)
+    private static function updatePasswordInDB($newPassword)
     {
-        try {
 
             $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-            $sql = "UPDATE tb_users SET password = :password WHERE user_id = :user_id";
-            $auth = self::getInstance();
+            $sql = "UPDATE users SET password = :password WHERE user_id = :user_id";
+            $auth = self::initializeAuthentication();
             $statement = $auth->databaseConnection->prepare($sql);
             $statement->bindParam(":password", $newPassword, PDO::PARAM_STR);
-            $statement->bindParam(":user_id", self::getCurrentUser()->getUserId(), PDO::PARAM_STR);
+            $statement->bindParam(":user_id", $_SESSION["auth-current-user"]->getUserId(), PDO::PARAM_STR);
             $statement->execute();
-
-        } catch (PDOException $ex) {
-            echo $ex->getMessage();
-        }
-
     }
 
     /**
