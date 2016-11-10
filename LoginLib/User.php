@@ -18,7 +18,6 @@ class User
     private $middleName;
     private $email;
     private $userId;
-    private $registeredSites;
     private $type;
 
     /**
@@ -28,17 +27,15 @@ class User
      * @param $middleName : Type is String
      * @param $email : Type is String
      * @param $userId : Type is integer
-     * @param $registeredSites : Type is array
      * @param $type : Type is AuthType(Enum)
      */
-    public function __construct($firstName, $lastName, $middleName, $email, $userId, $registeredSites, $type)
+    public function __construct($firstName, $lastName, $middleName, $email, $userId, $type)
     {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->middleName = $middleName;
         $this->email = $email;
         $this->userId = $userId;
-        $this->registeredSites = $registeredSites;
         $this->type = $type;
     }
 
@@ -160,35 +157,6 @@ class User
     }
 
     /**
-     * Returns REGISTERED SITES of user.
-     * @return Array of Strings
-     */
-    public function getRegisteredSites()
-    {
-        return $this->registeredSites;
-    }
-
-    /**
-     * Sets REGISTERED SITES of user.
-     * Checks if $registeredSites is a valid array.
-     * Returns true if set was successful (valid).
-     * Returns false if set was unsuccessful (invalid).
-     * @param Array of Strings $registeredSites
-     * @return Boolean
-     */
-    public function setRegisteredSites($registeredSites)
-    {
-        if (is_array($registeredSites)) {
-            $this->registeredSites = $registeredSites;
-            return true;
-        } else {
-            echo "Error from User class: setRegisteredSites(\$registeredSites): your variable \$registeredSites is not an array.";
-            return false;
-        }
-
-    }
-
-    /**
      * Returns TYPE of user.
      * @return AuthType (enum)
      */
@@ -225,6 +193,11 @@ class User
     public function isValidName($name)
     {
         return ctype_alpha(str_replace("-", "", $name));
+    }
+
+    public function __toString()
+    {
+        return "<b>CLASS INFO:</b> This is a User class object use the class's getter methods to retrieve data from this object. This class contains these field values: [". $this->firstName . "], [" . $this->getMiddleName() . "], [" . $this->lastName . "], [" . $this->email . "], [" . $this->type . "], [" . $this->userId . "]";
     }
 
 

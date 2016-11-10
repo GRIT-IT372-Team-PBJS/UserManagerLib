@@ -20,4 +20,5 @@ abstract class AuthType
     const EMPLOYEE = "EMPLOYEE";
     const STUDENT = "STUDENT";
     const GUEST = "GUEST";
+
 }

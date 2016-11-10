@@ -59,13 +59,13 @@ class Database
     private static function initializeConnection()
     {
         //Set database credentials here.
-        $databaseHost = "";
-        $databaseName = "";
-        $databaseUsername = "";
-        $databasePassword = "";
+        //Make sure to put the database-constant outside public and reset
+        //the path if needed.
+        require_once "../database-constants.php";
 
         $db = self::getInstance();
-        return $db->databaseConnection = new PDO("mysql:host=" . $databaseHost . "; dbname=" . $databaseName . "", "" . $databaseUsername . "", "" . $databasePassword . "");
+        $db->databaseConnection = new PDO("mysql:host=" . DB_HOST . "; dbname=" . DB_NAME . "", "" . DB_USER . "", "" . DB_PASS . "");
+        return $db;
 
     }
 }

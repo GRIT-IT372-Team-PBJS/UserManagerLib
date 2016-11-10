@@ -25,7 +25,6 @@ class Authentication
 {
     private static $instance;
     private $databaseConnection;
-    private $currentUser;
 
     /**
      * Logs in user and sets user session and credentials for the current user.
@@ -33,22 +32,38 @@ class Authentication
      * Returns false if login was unsuccessful.
      * @param $postEmail : Post data in the form of an email address.
      * @param $postPassword : Post data in the form of a password.
+     * @param $currentSite : static input used to indicate which app user is trying to login to
      * @return Boolean
      */
-    public static function login($postEmail, $postPassword)
+    public static function login($postEmail, $postPassword, $currentSite)
     {
         self::initializeAuthentication();
 
-        if (!self::isLoggedIn() && self::isRegisteredToCurrentSite()) {
+        if (!self::isLoggedIn()) {
 
             $result = self::fetchUserDataFromDB($postEmail);
 
-            if (self::isPasswordValid($result, $postPassword)) {
+            if (self::isRegisteredToCurrentSite($currentSite, $result["user_id"])) {
 
-                self::setCurrentUser($result["first_name"], $result["middle_name"], $result["last_name"], $result["email"], $result["user_id"], $result["registered_sites"], $result["auth_type"]);
-                self::setUserSession($result);
-                self::closeDBConnection();
-                return true;
+                if (self::isPasswordValid($result, $postPassword)) {
+
+                    $middleName = isset($result["middlename"]) ? $result["middlename"] : "";
+                    $firstName = isset($result["firstname"]) ? $result["firstname"] : "";
+                    $lastName = isset($result["lastname"]) ? $result["lastname"] : "";
+                    $emailName = isset($result["email"]) ?  $result["email"] : "";
+                    $userId = isset($result["user_id"]) ? $result["user_id"] : "";
+                    $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
+
+                    self::setCurrentUserSession($firstName, $middleName, $lastName, $emailName, $userId, $authType);
+                    Database::closeDBConnection();
+
+                    return true;
+
+                } else {
+
+                    return false;
+
+                }
 
             } else {
 
@@ -61,6 +76,85 @@ class Authentication
             return false;
 
         }
+
+    }
+
+    /**
+     * Fetches user data from database and returns the results.
+     * @param $email : loginEmail
+     * @return $results : results in the database.
+     */
+    private static function fetchUserDataFromDB($email)
+    {
+
+            $sql = "SELECT * FROM users WHERE email = :email";
+            $auth = self::initializeAuthentication();
+            $statement = $auth->databaseConnection->prepare($sql);
+            $statement->bindParam(":email", $email, PDO::PARAM_STR);
+            $statement->execute();
+            $result = $statement->fetch();
+
+            return $result;
+
+    }
+
+    private static function isRegisteredToCurrentSite($currentSite, $userId)
+    {
+        $sql = "SELECT site_id FROM sites WHERE site_name = :site_name";
+        $auth = self::initializeAuthentication();
+        $statement = $auth->databaseConnection->prepare($sql);
+        $statement->bindParam(":site_name", $currentSite, PDO::PARAM_STR);
+        $statement->execute();
+        $result = $statement->fetch();
+
+        $siteId = $result["site_id"];
+
+        $sql = "SELECT count(*) FROM user_site_xref WHERE site_id = :site_id AND user_id = :user_id";
+        $auth = self::initializeAuthentication();
+        $statement = $auth->databaseConnection->prepare($sql);
+        $statement->bindParam(":site_id", $siteId, PDO::PARAM_INT);
+        $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
+        $statement->execute();
+
+        if($statement->fetchColumn() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * Checks if password is valid.
+     * (verifies Hashed Passwords)
+     * @param $dbResults
+     * @param $loginPassword
+     * @return Boolean
+     */
+    private static function isPasswordValid($dbResults, $loginPassword)
+    {
+
+            if (password_verify($loginPassword, $dbResults["password"])) {
+                return true;
+            } else {
+                return false;
+            }
+
+
+    }
+
+    /**
+     * Builds and sets the current user.
+     * @param $firstName
+     * @param $middleName
+     * @param $lastName
+     * @param $email
+     * @param $userId
+     * @param $type
+     */
+    private static function setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $type)
+    {
+        $_SESSION["auth-current-user"] = new User($firstName, $middleName, $lastName, $email, $userId, $type);
     }
 
     /**
@@ -72,9 +166,8 @@ class Authentication
 
         if (self::isLoggedIn()) {
 
-            self::unsetCurrentUser();
             self::unsetUserSession();
-            self::closeDBConnection();
+            Database::closeDBConnection();
             self::$instance = null;
 
         }
@@ -84,19 +177,32 @@ class Authentication
      * checks to see if a user is logged in.
      * @return Boolean
      */
-    public static function isLoggedIn()
+    private static function isLoggedIn()
     {
-        return !(self::getCurrentUser() == null);
+        $currentUser = isset($_SESSION["auth-current-user"]) ? $_SESSION["auth-current-user"] : "";
+        return $currentUser != "";
     }
 
-    /**
-     * Returns the current User.
-     * @return User
-     */
-    public static function getCurrentUser()
-    {
-        $auth = self::getInstance();
-        return $auth->currentUser;
+    public static function isValidUserOrRedirectTo($url) {
+        if(self::isLoggedIn()){
+
+            $userId = $_SESSION["auth-current-user"]->getUserId();
+
+            $sql = "SELECT count(*) FROM users WHERE user_id = :user_id";
+            $auth = self::initializeAuthentication();
+            $statement = $auth->databaseConnection->prepare($sql);
+            $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
+            $statement->execute();
+            $row = $statement->fetchColumn();
+
+            if ($row < 1){
+                header("Location: " . $url);
+            }
+
+        } else {
+            header("Location: " . $url);
+        }
+
     }
 
     /**
@@ -109,17 +215,17 @@ class Authentication
 
             self::initializeAuthentication();
             self::updatePasswordInDB($newPassword);
-            self::closeDBConnection();
+            Database::closeDBConnection();
 
         }
-
     }
 
     /**
      * Updates the password in the database.
      * @param $newPassword
      */
-    private static function updatePasswordInDB($newPassword)
+    private
+    static function updatePasswordInDB($newPassword)
     {
         try {
 
@@ -139,107 +245,11 @@ class Authentication
     }
 
     /**
-     * Fetches user data from database and returns the results.
-     * @param $email
-     * @return Database
-     */
-    private static function fetchUserDataFromDB($email)
-    {
-        try {
-
-            $sql = "SELECT first_name, middle_name, last_name, email, user_id, registered_sites, auth_type, password FROM tb_users WHERE email = :email";
-            $auth = self::getInstance();
-            $statement = $auth->databaseConnection->prepare($sql);
-            $statement->bindParam(":email", $email, PDO::PARAM_STR);
-            $statement->execute();
-            $result = $statement->fetch(PDO::FETCH_ASSOC);
-
-            return $result;
-
-        } catch (PDOException $ex) {
-            echo $ex->getMessage();
-            return null;
-        }
-    }
-
-    /**
-     * Checks if password is valid.
-     * (verifies Hashed Passwords)
-     * @param $result
-     * @param $password
-     * @return Boolean
-     */
-    private static function isPasswordValid($result, $password)
-    {
-        if ($result->rowCount() > 0) {
-            if (password_verify($password, $result["password"])) {
-                return true;
-            } else {
-                return false;
-            }
-
-        } else {
-            return false;
-        }
-    }
-
-    private static function closeDBConnection()
-    {
-        $db = self::getInstance();
-        $db = $db::getDBConnection();
-        $db::closeDBConnection();
-
-    }
-
-    /**
-     * Returns a database connection
-     * @return Database
-     */
-    private static function getDBConnection()
-    {
-        return self::databaseConnection;
-    }
-
-    /**
-     * Sets the user session.
-     * @param $result
-     */
-    private static function setUserSession($result)
-    {
-        $_SESSION["user_session"] = $result["user_id"];
-    }
-
-    /**
      * Un-sets the user session.
      */
     private static function unsetUserSession()
     {
-        unset($_SESSION["user_session"]);
-    }
-
-    /**
-     * Builds and sets the current user.
-     * @param $firstName
-     * @param $middleName
-     * @param $lastName
-     * @param $email
-     * @param $userId
-     * @param $registeredSites
-     * @param $type
-     */
-    private static function setCurrentUser($firstName, $middleName, $lastName, $email, $userId, $registeredSites, $type)
-    {
-        $auth = self::getInstance();
-        $auth->currentUser = new User($firstName, $middleName, $lastName, $email, $userId, $registeredSites, $type);
-    }
-
-    /**
-     * un-sets the current user.
-     */
-    private static function unsetCurrentUser()
-    {
-        $auth = self::getInstance();
-        $auth->currentUser = null;
+        unset($_SESSION["auth-current-user"]);
     }
 
     /**
@@ -264,11 +274,7 @@ class Authentication
     {
         $auth = self::getInstance();
         $auth->databaseConnection = Database::getDBConnection();
-
-    }
-
-    private  static function isRegisteredToCurrentSite(){
-
+        return $auth;
 
     }
 
