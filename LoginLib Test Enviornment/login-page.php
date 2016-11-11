@@ -1,6 +1,8 @@
-<?php session_start();
+<?php
 
                     require_once "../LoginLib/Authentication.php";
+                    session_start();
+
                     $currentPassword =  password_hash("get2work", PASSWORD_DEFAULT);
                     $siteName = "it-connect";
 
@@ -9,7 +11,7 @@
                         Authentication::login(/*"pk2@gmail.com"*/ $_POST["email"], /*"get2work"*/ $_POST["password"], $siteName);
                     }
 
-                    echo $_POST["email"];
+                    echo isset($_SESSION["auth-current-user"]) ? $_SESSION["auth-current-user"]->getFirstName() : "No Data";
 
 //        Authentication::logout();
 
