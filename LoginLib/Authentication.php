@@ -36,7 +36,7 @@ class Authentication
      * @param $authorizationType : This last parameter is optional, it allows you to set restrictions on what type of user can login.
      * @return Boolean
      */
-    public static function login($postEmail, $postPassword, $currentSite, $authorizationType)
+    public static function login($postEmail, $postPassword, $currentSite)
     {
         self::initializeAuthentication();
 
@@ -63,6 +63,8 @@ class Authentication
                         return true;
 
                     } else if(func_num_args() == 4) {
+
+                        $authorizationType = func_get_arg(3);
 
                         if($authType == $authorizationType) {
 
@@ -207,7 +209,7 @@ class Authentication
      * @param $url : This is the location you want the user to redirect to if they are not an authorized user.
      * @param $authorizationType : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.
      */
-    public static function isValidUserElseRedirectTo($url, $authorizationType) {
+    public static function isValidUserElseRedirectTo($url) {
         if(self::isLoggedIn()){
 
             $userId = $_SESSION["auth-current-user"]->getUserId();
@@ -224,6 +226,8 @@ class Authentication
             }
 
             if (func_num_args() == 2) {
+
+                $authorizationType = func_get_args(1);
 
                 if ($_SESSION["auth-current-user"]->getType() == $authorizationType){
                     header("Location: " . $url);
