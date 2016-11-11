@@ -72,31 +72,19 @@ class Authentication
                             Database::closeDBConnection();
 
                             return true;
-
                         } else {
                             return false;
                         }
-
                     }
-
                 } else {
-
                     return false;
-
                 }
-
             } else {
-
                 return false;
-
             }
-
         } else {
-
             return false;
-
         }
-
     }
 
     /**
@@ -106,7 +94,6 @@ class Authentication
      */
     private static function fetchUserDataFromDB($email)
     {
-
             $sql = "SELECT * FROM users WHERE email = :email";
             $auth = self::initializeAuthentication();
             $statement = $auth->databaseConnection->prepare($sql);
@@ -115,7 +102,6 @@ class Authentication
             $result = $statement->fetch();
 
             return $result;
-
     }
 
     private static function isRegisteredToCurrentSite($currentSite, $userId)
@@ -137,11 +123,13 @@ class Authentication
         $statement->execute();
 
         if($statement->fetchColumn() > 0) {
+
             return true;
+            
         } else {
+
             return false;
         }
-
     }
 
     /**
@@ -153,14 +141,14 @@ class Authentication
      */
     private static function isPasswordValid($dbResults, $loginPassword)
     {
-
             if (password_verify($loginPassword, $dbResults["password"])) {
+
                 return true;
+
             } else {
+
                 return false;
             }
-
-
     }
 
     /**
@@ -207,9 +195,7 @@ class Authentication
      */
     private static function isLoggedIn()
     {
-
         return isset($_SESSION["auth-current-user"]);
-
     }
 
     /**
@@ -255,13 +241,10 @@ class Authentication
      */
     public static function changePassword($newPassword)
     {
-
         if (self::isLoggedIn()){
 
             self::updatePasswordInDB($newPassword);
             Database::closeDBConnection();
-
-
         }
     }
 
@@ -271,7 +254,6 @@ class Authentication
      */
     private static function updatePasswordInDB($newPassword)
     {
-
             $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $userId = $_SESSION["auth-current-user"]->getUserId();
 
@@ -281,8 +263,6 @@ class Authentication
             $statement->bindParam(":password", $newPassword, PDO::PARAM_STR);
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
-
-
     }
 
     /**
@@ -300,8 +280,8 @@ class Authentication
      */
     private static function getInstance()
     {
-
         if (self::$instance == null) {
+
             self::$instance = new Authentication();
         }
 
@@ -315,8 +295,8 @@ class Authentication
     {
         $auth = self::getInstance();
         $auth->databaseConnection = Database::getDBConnection();
-        return $auth;
 
+        return $auth;
     }
 
 
