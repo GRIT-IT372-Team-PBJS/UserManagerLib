@@ -47,7 +47,7 @@ class Authentication
             $middleName = isset($result["middlename"]) ? $result["middlename"] : "";
             $firstName = isset($result["firstname"]) ? $result["firstname"] : "";
             $lastName = isset($result["lastname"]) ? $result["lastname"] : "";
-            $emailName = isset($result["email"]) ?  $result["email"] : "";
+            $email = isset($result["email"]) ?  $result["email"] : "";
             $userId = isset($result["user_id"]) ? $result["user_id"] : "";
             $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
 
@@ -57,7 +57,7 @@ class Authentication
 
                     if(func_num_args() < 4) {
 
-                        self::setCurrentUserSession($firstName, $middleName, $lastName, $emailName, $userId, $authType);
+                        self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $authType);
                         Database::closeDBConnection();
 
                         return true;
@@ -68,7 +68,7 @@ class Authentication
 
                         if($authType == $authorizationType) {
 
-                            self::setCurrentUserSession($firstName, $middleName, $lastName, $emailName, $userId, $authType);
+                            self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $authType);
                             Database::closeDBConnection();
 
                             return true;
@@ -180,6 +180,7 @@ class Authentication
     /**
      * Logs out user by un-setting the current user, user session, database connection and
      * setting the instance to null.
+     * @param $redirectURL : This is an Optional parameter, Takes a string url and will redirect to that url upon logging out.
      */
     public static function logout()
     {
@@ -187,10 +188,17 @@ class Authentication
         if (self::isLoggedIn()) {
 
             self::unsetUserSession();
+
+            if (func_num_args() == 1) {
+                $redirectUrl = func_get_arg(0);
+                header("Location: " . $redirectUrl);
+            }
+
             Database::closeDBConnection();
             self::$instance = null;
 
         }
+
     }
 
     /**
@@ -199,8 +207,8 @@ class Authentication
      */
     private static function isLoggedIn()
     {
-        $currentUser = isset($_SESSION["auth-current-user"]) ? $_SESSION["auth-current-user"] : "";
-        return $currentUser != "";
+
+        return isset($_SESSION["auth-current-user"]);
 
     }
 
@@ -247,10 +255,12 @@ class Authentication
      */
     public static function changePassword($newPassword)
     {
+
         if (self::isLoggedIn()){
 
             self::updatePasswordInDB($newPassword);
             Database::closeDBConnection();
+
 
         }
     }
@@ -263,21 +273,24 @@ class Authentication
     {
 
             $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $userId = $_SESSION["auth-current-user"]->getUserId();
 
             $sql = "UPDATE users SET password = :password WHERE user_id = :user_id";
             $auth = self::initializeAuthentication();
             $statement = $auth->databaseConnection->prepare($sql);
             $statement->bindParam(":password", $newPassword, PDO::PARAM_STR);
-            $statement->bindParam(":user_id", $_SESSION["auth-current-user"]->getUserId(), PDO::PARAM_STR);
+            $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
+
+
     }
 
     /**
-     * Un-sets the user session.
+     * destroys session.
      */
     private static function unsetUserSession()
     {
-        unset($_SESSION["auth-current-user"]);
+        session_destroy();
     }
 
     /**
