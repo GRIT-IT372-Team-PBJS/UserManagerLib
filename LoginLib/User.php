@@ -27,7 +27,7 @@ class User
      * @param $middleName : Type is String
      * @param $email : Type is String
      * @param $userId : Type is integer
-     * @param $type : Type is AuthType(Enum)
+     * @param $type : Type is String
      */
     public function __construct($firstName, $lastName, $middleName, $email, $userId, $type)
     {
@@ -40,30 +40,12 @@ class User
     }
 
     /**
-     * Returns the First name of the user.
+     * Returns the FIRST name of the user.
      * @return String
      */
     public function getFirstName()
     {
         return $this->firstName;
-    }
-
-    /**
-     * Sets the FIRST name of the user.
-     * Returns true if set was successful (valid).
-     * Returns false if set was unsuccessful (invalid).
-     * @param String $firstName
-     * @return Boolean
-     */
-    public function setFirstName($firstName)
-    {
-        if ($this->isValidName($firstName)) {
-            $this->firstName = $firstName;
-            return true;
-        } else {
-            return false;
-        }
-
     }
 
     /**
@@ -75,22 +57,6 @@ class User
         return $this->lastName;
     }
 
-    /**
-     * Sets the LAST name of the user.
-     * Returns true if set was successful (valid).
-     * Returns false if set was unsuccessful (invalid).
-     * @param String $lastName
-     * @return Boolean
-     */
-    public function setLastName($lastName)
-    {
-        if ($this->isValidName($lastName)) {
-            $this->lastName = $lastName;
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     /**
      * Returns MIDDLE name of the user.
@@ -102,49 +68,12 @@ class User
     }
 
     /**
-     * Sets MIDDLE name of the user.
-     * Returns true if set was successful (valid).
-     * Returns false if set was unsuccessful (invalid).
-     * @param String $middleName (can be an empty string)
-     * @return Boolean
-     */
-    public function setMiddleName($middleName)
-    {
-        if ($this->isValidName($middleName)) {
-            $this->lastName = $middleName;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Returns EMAIL of the user.
      * @return String
      */
     public function getEmail()
     {
         return $this->email;
-    }
-
-    /**
-     * Sets EMAIL of the user.
-     * Checks if $email is valid
-     * Returns true if set was successful (valid).
-     * Returns false if set was unsuccessful (invalid).
-     * @param String $email
-     * @return Boolean
-     */
-    public function setEmail($email)
-    {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->email = $email;
-            return true;
-        } else {
-            echo "Error from User class: setRegisteredSites(\$email): your variable \$email is not an valid email.";
-            return false;
-        }
-
     }
 
     /**
@@ -158,31 +87,11 @@ class User
 
     /**
      * Returns TYPE of user.
-     * @return AuthType (enum)
+     * @return string
      */
     public function getType()
     {
         return $this->type;
-    }
-
-    /**
-     * Sets Type of User.
-     * Checks if AuthType is valid.
-     * Returns true if set was successful (valid).
-     * Returns false if set was unsuccessful (invalid).
-     * @param AuthType (enum) $type
-     * @return Boolean
-     */
-    public function setType($type)
-    {
-        if (AuthType::$type == $type) {
-            $this->type = AuthType::$type;
-            return true;
-        } else {
-            echo "Error from User class: setType(\$type): Your variable \$type is an invalid type.";
-            return false;
-        }
-
     }
 
     /**
@@ -195,6 +104,10 @@ class User
         return ctype_alpha(str_replace("-", "", $name));
     }
 
+    /**
+     * Modified to string for error handling.
+     * @return string
+     */
     public function __toString()
     {
         return "<b>CLASS INFO:</b> This is a User class object use the class's getter methods to retrieve data from this object. This class contains these field values: [". $this->firstName . "], [" . $this->getMiddleName() . "], [" . $this->lastName . "], [" . $this->email . "], [" . $this->type . "], [" . $this->userId . "]";

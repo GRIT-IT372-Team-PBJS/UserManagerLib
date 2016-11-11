@@ -125,7 +125,7 @@ class Authentication
         if($statement->fetchColumn() > 0) {
 
             return true;
-            
+
         } else {
 
             return false;
