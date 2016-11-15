@@ -55,7 +55,9 @@ class Authentication
 
                 if (self::isPasswordValid($result, $postPassword)) {
 
-                    if(func_num_args() < 4) {
+                    $isAuthenticationTypePassedIn = func_num_args() > 3;
+
+                    if(!$isAuthenticationTypePassedIn) {
 
                         self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $authType);
                         Database::closeDBConnection();
