@@ -12,22 +12,40 @@ require_once "Database.php";
 
 class Registration
 {
-    private $db;
+    private $dbConnection;
 
-    public static function registerUser($firstName, $middleName, $lastName, $email, $currentSite, $type, $password)
+    /**
+     * This method is responsible for registering existing users to new sites or new users in general.
+     * Returns True is registration was successful.
+     * Returns False if registration was unsuccessful.
+     * @param $firstName : String first name.
+     * @param $middleName : String middle name (can be left blank if no middle name)
+     * @param $lastName : String last name.
+     * @param $email : String email.
+     * @param $currentSite : String current site name.
+     * @param $type : String user type.
+     * @param $password : This parameter is Optional because if a user already exists in the db they dont need to set a password field.
+     * if the user doesnt exist in the database then the parameter is used to create that user with the new password.
+     * @return Boolean
+     */
+    public static function registerUser($firstName, $middleName, $lastName, $email, $currentSite, $type)
     {
-        if (self::userExists($email)) {
+        //This gets the 7th argument passed in as a $password.
+        $password = func_get_arg(6);
+
+        if (self::doesUserExistsInDB($email)) {
 
             self::registerUserToSite($email, $currentSite);
             return true;
 
         } else {
 
-            if (self::isAllIncomingDataValid()) {
+            if (self::isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type, $password)) {
 
-                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                    self::addNewUserToDB($firstName, $middleName, $lastName, $email, $currentSite, $type, $hashedPassword);
-                    return true;
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+                self::addNewUserToDB($firstName, $middleName, $lastName, $email, $currentSite, $type, $hashedPassword);
+                return true;
 
             } else {
 
@@ -38,28 +56,24 @@ class Registration
         }
     }
 
-    private static function userExists($email)
+    private static function doesUserExistsInDB($email)
     {
 
 
     }
 
 
-    private static function registerUserToSite($email, $registeredSite) {
+    private static function registerUserToSite($email, $registeredSite)
+    {
         return true;
     }
 
-    private static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type)
+    private static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type,$password)
     {
-        $registeredUser = new User();
 
         //if all user data is valid return true.
-        if ($registeredUser->setFirstName($firstName) &
-            $registeredUser->setLastName($lastName) &
-            $registeredUser->setMiddleName($middleName) &
-            $registeredUser->setEmail($email) &
-            $registeredUser->setRegisteredSites(self::addStringToNewArray($currentSite)) &
-            $registeredUser->setType($type)
+        if (self::isValidName($firstName) && self::isValidMiddleName($middleName) && self::isValidName($lastName) &&
+            self::isValidEmail($email) && self::isValidSite($currentSite) && self::isValidType($type) && isPasswordValid($password)
         ) {
 
             return true;
@@ -71,19 +85,44 @@ class Registration
         }
     }
 
-    private static function addStringToNewArray($currentSite)
+    public static function isValidName($name)
     {
-        $currentSiteArr = [];
-        $currentSiteArr[0] = $currentSite;
-        return $currentSiteArr;
+
     }
 
-    private static function getDBConnection(){
-        return self::$db = Database::getDBConnection();
+    public static function isValidMiddleName($middleName)
+    {
+
     }
 
-    private static function closeDBConnection(){
+    public static function isValidEmail($email)
+    {
+
+    }
+
+    public static function isValidSite($currentSite)
+    {
+
+    }
+
+    public static function isValidType($type)
+    {
+
+    }
+
+    public static function isPasswordValid($password) {
+
+    }
+
+
+    private static function getDBConnection()
+    {
+        return self::$dbConnection = Database::getDBConnection();
+    }
+
+    private static function closeDBConnection()
+    {
         Database::closeDBConnection();
-        }
+    }
 
 }
