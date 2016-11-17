@@ -9,11 +9,10 @@
 
 require_once "User.php";
 require_once "Database.php";
+require_once "PackageFunctions.php";
 
 class Registration
 {
-    private $dbConnection;
-
     /**
      * This method is responsible for registering existing users to new sites or new users in general.
      * Returns True is registration was successful.
@@ -25,18 +24,29 @@ class Registration
      * @param $currentSite : String current site name.
      * @param $type : String user type.
      * @param $password : This parameter is Optional because if a user already exists in the db they dont need to set a password field.
-     * if the user doesnt exist in the database then the parameter is used to create that user with the new password.
+     * if the user doesn't exist in the database then the parameter is used to create that user with the new password.
      * @return Boolean
      */
     public static function registerUser($firstName, $middleName, $lastName, $email, $currentSite, $type)
     {
+        self::initializeRegistration();
+
         //This gets the 7th argument passed in as a $password.
         $password = func_get_arg(6);
 
-        if (self::doesUserExistsInDB($email)) {
+        if (HelperFunctions::isUserInDB($email)){
 
-            self::registerUserToSite($email, $currentSite);
-            return true;
+            if(!HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
+
+                self::registerUserToSite($email, $currentSite);
+
+                return true;
+
+            } else {
+
+                return false;
+
+            }
 
         } else {
 
@@ -44,7 +54,9 @@ class Registration
 
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-                self::addNewUserToDB($firstName, $middleName, $lastName, $email, $currentSite, $type, $hashedPassword);
+                self::addNewUserToDB($firstName, $middleName, $lastName, $email, $type, $hashedPassword);
+                self::registerUserToSite($email, $currentSite);
+
                 return true;
 
             } else {
@@ -56,19 +68,34 @@ class Registration
         }
     }
 
-    private static function doesUserExistsInDB($email)
-    {
+    private static function addNewUserToDB($firstName, $middleName, $lastName, $email, $type, $hashedPassword){
 
+        $sql = "INSERT INTO Users (firstname, lastname, middlename, email, auth_type, password)
+                VALUES(:firstname, :lastname, :middlename, :email, :auth_type, :password)";
 
+        $statement = Database::getDBConnection()->prepare($sql);
+        $statement->bindParam(":firstname", $firstName);
+        $statement->bindParam(":lastname", $lastName);
+        $statement->bindParam(":middlename", $middleName);
+        $statement->bindParam(":email", $email);
+        $statement->bindParam(":auth_type", $type);
+        $statement->bindParam(":password", $hashedPassword);
+        $statement->execute();
     }
 
 
-    private static function registerUserToSite($email, $registeredSite)
+    private static function registerUserToSite($email, $currentSite)
     {
-        return true;
+        $sql = "INSERT INTO user_site_xref (user_id, site_id)
+                VALUES(:user_id, :site_id)";
+
+        $statement = Database::getDBConnection()->prepare($sql);
+        $statement->bindParam(":user_id", HelperFunctions::getUserId($email));
+        $statement->bindParam(":site_id", HelperFunctions::getSiteId($currentSite));
+        $statement->execute();
     }
 
-    private static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type,$password)
+    public static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type,$password)
     {
 
         //if all user data is valid return true.
@@ -114,15 +141,5 @@ class Registration
 
     }
 
-
-    private static function getDBConnection()
-    {
-        return self::$dbConnection = Database::getDBConnection();
-    }
-
-    private static function closeDBConnection()
-    {
-        Database::closeDBConnection();
-    }
 
 }

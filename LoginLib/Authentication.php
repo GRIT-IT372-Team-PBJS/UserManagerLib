@@ -24,7 +24,7 @@ require_once "User.php";
 class Authentication
 {
     private static $instance;
-    private $databaseConnection;
+    private $dbConnection;
 
     /**
      * Logs in user and sets user session and credentials for the current user.
@@ -51,7 +51,7 @@ class Authentication
             $userId = isset($result["user_id"]) ? $result["user_id"] : "";
             $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
 
-            if (self::isRegisteredToCurrentSite($currentSite, $result["user_id"])) {
+            if (HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
 
                 if (self::isPasswordValid($result, $postPassword)) {
 
@@ -98,40 +98,12 @@ class Authentication
     {
             $sql = "SELECT * FROM users WHERE email = :email";
             $auth = self::initializeAuthentication();
-            $statement = $auth->databaseConnection->prepare($sql);
+            $statement = $auth->dbConnection->prepare($sql);
             $statement->bindParam(":email", $email, PDO::PARAM_STR);
             $statement->execute();
             $result = $statement->fetch();
 
             return $result;
-    }
-
-    private static function isRegisteredToCurrentSite($currentSite, $userId)
-    {
-        $sql = "SELECT site_id FROM sites WHERE site_name = :site_name";
-        $auth = self::initializeAuthentication();
-        $statement = $auth->databaseConnection->prepare($sql);
-        $statement->bindParam(":site_name", $currentSite, PDO::PARAM_STR);
-        $statement->execute();
-        $result = $statement->fetch();
-
-        $siteId = $result["site_id"];
-
-        $sql = "SELECT count(*) FROM user_site_xref WHERE site_id = :site_id AND user_id = :user_id";
-        $auth = self::initializeAuthentication();
-        $statement = $auth->databaseConnection->prepare($sql);
-        $statement->bindParam(":site_id", $siteId, PDO::PARAM_INT);
-        $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
-        $statement->execute();
-
-        if($statement->fetchColumn() > 0) {
-
-            return true;
-
-        } else {
-
-            return false;
-        }
     }
 
     /**
@@ -212,7 +184,7 @@ class Authentication
 
             $sql = "SELECT count(*) FROM users WHERE user_id = :user_id";
             $auth = self::initializeAuthentication();
-            $statement = $auth->databaseConnection->prepare($sql);
+            $statement = $auth->dbConnection->prepare($sql);
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
             $row = $statement->fetchColumn();
@@ -261,7 +233,7 @@ class Authentication
 
             $sql = "UPDATE users SET password = :password WHERE user_id = :user_id";
             $auth = self::initializeAuthentication();
-            $statement = $auth->databaseConnection->prepare($sql);
+            $statement = $auth->dbConnection->prepare($sql);
             $statement->bindParam(":password", $newPassword, PDO::PARAM_STR);
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
@@ -296,7 +268,7 @@ class Authentication
     private static function initializeAuthentication()
     {
         $auth = self::getInstance();
-        $auth->databaseConnection = Database::getDBConnection();
+        $auth->dbConnection = Database::getDBConnection();
 
         return $auth;
     }
