@@ -13,8 +13,7 @@
  * It takes care of the login and logout functions,
  * resets passwords and changes passwords and
  * keeps track of the current user. This class is a singleton
- * so that there cant be more than one current user at a time per
- * client.
+ * so that sessions dont end up overwritten unknowingly.
  */
 
 //Required classes for this class.
@@ -68,7 +67,7 @@ class Authentication
 
                         $authorizationType = func_get_arg(3);
 
-                        if($authType == $authorizationType) {
+                        if($authType == $authorizationType && HelperFunctions::isValidType($authType)) {
 
                             self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $authType);
                             Database::closeDBConnection();
@@ -175,7 +174,7 @@ class Authentication
     /**
      * This method is use when you want to restrict a page to users who are not logged in.
      * @param $url : This is the location you want the user to redirect to if they are not an authorized user.
-     * @param $authorizationType : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.
+     * @param $authType : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.
      */
     public static function isValidUserElseRedirectTo($url) {
         if(self::isLoggedIn()){
@@ -193,12 +192,17 @@ class Authentication
                 header("Location: " . $url);
             }
 
-            if (func_num_args() == 2) {
+            $isAuthArgumentPassedIn = func_num_args() == 2;
 
-                $authorizationType = func_get_args(1);
+            if ($isAuthArgumentPassedIn) {
 
-                if ($_SESSION["auth-current-user"]->getType() == $authorizationType){
-                    header("Location: " . $url);
+                $authType = func_get_args(1);
+
+                if(HelperFunctions::isValidType($authType)){
+
+                    if ($_SESSION["auth-current-user"]->getType() != $authType){
+                        header("Location: " . $url);
+                    }
                 }
 
             }
@@ -271,6 +275,49 @@ class Authentication
         $auth->dbConnection = Database::getDBConnection();
 
         return $auth;
+    }
+
+    public static function forgotPassword($email){
+
+        $generatedPass = self::generate_password();
+        self::insertGeneratedPasswordIntoDB($generatedPass, $email);
+
+        $to      = $email;
+        $subject = 'Password Reset - Green River Tech';
+        $message = 'Hi GR Student,' . "\r\n"
+        . "\r\n" . "You have submitted a password change request. Here is your new password: " . "\r\n" . "\r\n" . $generatedPass . "\r\n" . "\r\n" . "Login with this password and change the password to anything you would like.";
+        $headers = 'From: noreply@greenrivertech.net' . "\r\n" .
+            'Reply-To: noreply@greenrivertech.net' . "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+
+        mail($to, $subject, $message, $headers);
+
+    }
+
+    private static function insertGeneratedPasswordIntoDB($generatedPass, $email) {
+
+        $generatedPass = password_hash($generatedPass, PASSWORD_DEFAULT);
+
+        $sql = "UPDATE users SET password = :password WHERE email = :email";
+        $auth = self::initializeAuthentication();
+        $statement = $auth->dbConnection->prepare($sql);
+        $statement->bindParam(":password", $generatedPass, PDO::PARAM_STR);
+        $statement->bindParam(":email", $email, PDO::PARAM_STR);
+        $statement->execute();
+    }
+
+    private static function generate_password($length = 10){
+
+        $chars =  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.
+            '0123456789`-=~!@#$%^&*()_+,./<>?;:[]{}\|';
+
+        $str = '';
+        $max = strlen($chars) - 1;
+
+        for ($i=0; $i < $length; $i++)
+            $str .= $chars[random_int(0, $max)];
+
+        return $str;
     }
 
 

@@ -1,21 +1,24 @@
 <?php
 
-require_once 'Database.php';
-require_once 'Authentication.php';
-require_once 'User.php';
+require_once "Database.php";
+require_once "Authentication.php";
+require_once "User.php";
+require_once "HelperFunctions.php";
 
 class UserFunctions{
 
 //Unsure of whether these are really necessary if we do use includes.
-private $dbConnection;
 private $currentUser;
 
   /**
    * UserFunctions constructor.
    */
 public function __construct(){
-  $this->dbConnection = Database::getDBConnection();
-  $this->currentUser = Authentication::getCurrentUser();
+
+  if (isset($_SESSION["auth-current-user"])){
+    $this->currentUser = $_SESSION["auth-current-user"];
+  }
+
 }
 
   /**
@@ -27,7 +30,7 @@ public function __construct(){
    */
 public function editFirstName($newFirstName){
 
-  if($this->currentUser->isValidName($newFirstName)){
+  if(HelperFunctions::isValidName($newFirstName, 2)){
     $sql = "UPDATE tb_users SET firstname = :firstname WHERE user_id = :user_id";
     $fieldToBeUpdated = ":email";
     $this->updateUserData($sql, $fieldToBeUpdated, $$newFirstName);
@@ -47,7 +50,7 @@ public function editFirstName($newFirstName){
    */
 public function editLastName($newLastName){
 
-  if($this->currentUser->isValidName($newLastName)){
+  if(HelperFunctions::isValidName($newLastName, 2)){
     $sql = "UPDATE tb_users SET lastname = :lastname WHERE user_id = :user_id";
     $fieldToBeUpdated = ":lastname";
     $this->updateUserData($sql, $fieldToBeUpdated, $newLastName);
@@ -67,7 +70,7 @@ public function editLastName($newLastName){
    */
 public function editMiddleName($newMiddleName){
 
-  if($this->currentUser->isValidName($newMiddleName)){
+  if(HelperFunctions::isValidMiddleName($newMiddleName)){
     $sql = "UPDATE tb_users SET middlename = :middlename WHERE user_id = :user_id";
     $fieldToBeUpdated = ":middlename";
     $this->updateUserData($sql, $fieldToBeUpdated, $newMiddleName);
@@ -87,7 +90,7 @@ public function editMiddleName($newMiddleName){
      */
 public function editEmail($newEmail){
 
-  if(filter_var($newEmail, FILTER_VALIDATE_EMAIL)){
+  if(HelperFunctions::isValidEmail($newEmail)){
     $sql = "UPDATE tb_users SET email = :email WHERE user_id = :user_id";
     $fieldToBeUpdated = ":email";
     $this->updateUserData($sql, $fieldToBeUpdated, $newEmail);

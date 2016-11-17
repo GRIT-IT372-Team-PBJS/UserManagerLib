@@ -50,7 +50,7 @@ class Registration
 
         } else {
 
-            if (self::isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type, $password)) {
+            if (HelperFunctions::isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type, $password)) {
 
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -95,51 +95,6 @@ class Registration
         $statement->execute();
     }
 
-    public static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type,$password)
-    {
-
-        //if all user data is valid return true.
-        if (self::isValidName($firstName) && self::isValidMiddleName($middleName) && self::isValidName($lastName) &&
-            self::isValidEmail($email) && self::isValidSite($currentSite) && self::isValidType($type) && isPasswordValid($password)
-        ) {
-
-            return true;
-
-        } else {
-
-            return false;
-
-        }
-    }
-
-    public static function isValidName($name)
-    {
-
-    }
-
-    public static function isValidMiddleName($middleName)
-    {
-
-    }
-
-    public static function isValidEmail($email)
-    {
-
-    }
-
-    public static function isValidSite($currentSite)
-    {
-
-    }
-
-    public static function isValidType($type)
-    {
-
-    }
-
-    public static function isPasswordValid($password) {
-
-    }
 
 
 }
