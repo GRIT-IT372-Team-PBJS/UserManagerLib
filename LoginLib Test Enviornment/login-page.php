@@ -8,6 +8,7 @@
 
 
                     if(isset($_POST["submit"])){
+
                         Authentication::login(/*"pk2@gmail.com"*/ $_POST["email"], /*"get2work"*/ $_POST["password"], $siteName);
                     }
 
@@ -19,7 +20,7 @@
 
         ?>
 
-            <a href="restricted-to-public-page.php">resticted site</a>
+            <a href="restricted-to-public-page.php">restricted site</a>
 
             <div class="row">
                 <h3 class="center-align">Login through Submit</h3>

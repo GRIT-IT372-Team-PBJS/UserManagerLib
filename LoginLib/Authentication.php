@@ -19,6 +19,7 @@
 //Required classes for this class.
 require_once "Database.php";
 require_once "User.php";
+require_once "HelperFunctions.php";
 
 class Authentication
 {
@@ -51,7 +52,7 @@ class Authentication
             $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
 
             if (HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
-
+             
                 if (self::isPasswordValid($result, $postPassword)) {
 
                     $isAuthenticationTypePassedIn = func_num_args() > 3;

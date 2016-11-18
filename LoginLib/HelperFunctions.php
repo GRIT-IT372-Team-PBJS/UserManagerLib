@@ -24,9 +24,9 @@ class HelperFunctions
 
     public static function getUserId($email){
 
-        $sql = "SELECT site_id FROM sites WHERE site_name = :site_name";
+        $sql = "SELECT user_id FROM users WHERE email = :email";
         $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":site_name", $email, PDO::PARAM_INT);
+        $statement->bindParam(":email", $email, PDO::PARAM_INT);
         $statement->execute();
         $result = $statement->fetch();
 
