@@ -107,6 +107,9 @@ private function updateUserData($sql, $fieldToBeUpdated, $valueOfField) {
   $statement->bindParam($fieldToBeUpdated, $valueOfField, PDO::PARAM_STR);
   $statement->bindParam(":user_id", $this->currentUser->getUserId, PDO::PARAM_INT);
   $statement->execute();
+
+  //Uncomment the code below if you want to do error handling on this database call.
+  //print_r($statement->errorInfo());
 }
 
 }

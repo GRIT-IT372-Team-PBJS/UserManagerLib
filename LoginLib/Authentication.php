@@ -52,7 +52,7 @@ class Authentication
             $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
 
             if (HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
-             
+
                 if (self::isPasswordValid($result, $postPassword)) {
 
                     $isAuthenticationTypePassedIn = func_num_args() > 3;
@@ -101,6 +101,10 @@ class Authentication
             $statement = $auth->dbConnection->prepare($sql);
             $statement->bindParam(":email", $email, PDO::PARAM_STR);
             $statement->execute();
+
+            //Uncomment the code below if you want to do error handling on this database call.
+            //print_r($statement->errorInfo());
+
             $result = $statement->fetch();
 
             return $result;
@@ -187,6 +191,10 @@ class Authentication
             $statement = $auth->dbConnection->prepare($sql);
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
+
+            //Uncomment the code below if you want to do error handling on this database call.
+            //print_r($statement->errorInfo());
+
             $row = $statement->fetchColumn();
 
             if ($row < 1){
@@ -242,6 +250,10 @@ class Authentication
             $statement->bindParam(":password", $newPassword, PDO::PARAM_STR);
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
+
+            //Uncomment the code below if you want to do error handling on this database call.
+            //print_r($statement->errorInfo());
+
     }
 
     /**
@@ -305,6 +317,9 @@ class Authentication
         $statement->bindParam(":password", $generatedPass, PDO::PARAM_STR);
         $statement->bindParam(":email", $email, PDO::PARAM_STR);
         $statement->execute();
+
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
     }
 
     private static function generate_password($length = 10){

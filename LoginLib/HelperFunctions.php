@@ -16,6 +16,10 @@ class HelperFunctions
         $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam(":site_name", $siteName, PDO::PARAM_INT);
         $statement->execute();
+
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
+
         $result = $statement->fetch();
 
         return $result["site_id"];
@@ -28,6 +32,10 @@ class HelperFunctions
         $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam(":email", $email, PDO::PARAM_INT);
         $statement->execute();
+
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
+
         $result = $statement->fetch();
 
         return $result["user_id"];
@@ -46,6 +54,9 @@ class HelperFunctions
         $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
         $statement->execute();
 
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
+
         if($statement->fetchColumn() > 0) {
 
             return true;
@@ -63,6 +74,10 @@ class HelperFunctions
         $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam(":email", $email, PDO::PARAM_STR);
         $statement->execute();
+
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
+
         $rowCount = $statement->fetchColumn();
 
         if ($rowCount > 0){
@@ -74,9 +89,10 @@ class HelperFunctions
 
     public static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type, $password)
     {
+
         //if all user data is valid return true.
         $isAllDataValid = self::isValidName($firstName, 2) && self::isValidMiddleName($middleName) && self::isValidName($lastName, 2) &&
-            self::isValidEmail($email) && self::isValidSite($currentSite) && self::isValidType($type) && isPasswordValid($password);
+            self::isValidEmail($email) && self::isValidSite($currentSite) && self::isValidType($type) && self::isPasswordValid($password);
 
         return $isAllDataValid;
     }
@@ -84,7 +100,7 @@ class HelperFunctions
     public static function isValidName($name, $minNumberOfChars)
     {
 
-        $isValidName = preg_match("/[^A-Za-z'-]/", $name);
+        $isValidName = preg_match("/^[a-zA-Z'-]+$/", $name);
         $isMoreThan1Char = strlen($name) >= $minNumberOfChars;
 
         return $isValidName && $isMoreThan1Char;
@@ -113,6 +129,9 @@ class HelperFunctions
         $statement->bindParam(":site_name", $currentSite, PDO::PARAM_STR);
         $statement->execute();
 
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
+
         $isValidSite = $statement->fetchColumn() > 0;
 
         return $isValidSite;
@@ -125,6 +144,9 @@ class HelperFunctions
         $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam(":auth_type", $type, PDO::PARAM_STR);
         $statement->execute();
+
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
 
         $isValidType = $statement->fetchColumn() > 0;
 
@@ -142,7 +164,7 @@ class HelperFunctions
      */
     public static function isPasswordValid($password) {
 
-        $isValidPassword = preg_match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$", $password);
+        $isValidPassword = preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/", $password);
 
         return $isValidPassword;
     }
