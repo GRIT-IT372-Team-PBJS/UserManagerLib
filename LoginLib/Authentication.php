@@ -30,6 +30,7 @@ class Authentication
      * Logs in user and sets user session and credentials for the current user.
      * Returns true if login was successful.
      * Returns false if login was unsuccessful.
+     *
      * @param $postEmail : Post data in the form of an email address.
      * @param $postPassword : Post data in the form of a password.
      * @param $currentSite : static input used to indicate which app user is trying to login to
@@ -223,15 +224,26 @@ class Authentication
     }
 
     /**
-     * Hashes Password and then updates the current user's password in the database.
+     * Updates the current user's password in the database. If the user is logged in and
+     * The new password is valid, the password is changed.
+     * Returns true if change was successful.
+     * Returns false if change was unsuccessful.
+     *
      * @param $newPassword : The new password to be put into the database.
+     * @return Boolean
      */
     public static function changePassword($newPassword)
     {
-        if (self::isLoggedIn()){
+        if (self::isLoggedIn() && HelperFunctions::isPasswordValid($newPassword)){
 
             self::updatePasswordInDB($newPassword);
             Database::closeDBConnection();
+
+            return true;
+
+        } else {
+
+            return false;
         }
     }
 
@@ -290,6 +302,10 @@ class Authentication
         return $auth;
     }
 
+    /**
+     * Resets the password with a generated password and emails the new password to the user.
+     * @param $email : the email address of the user who forgot their password.
+     */
     public static function forgotPassword($email){
 
         $generatedPass = self::generate_password();

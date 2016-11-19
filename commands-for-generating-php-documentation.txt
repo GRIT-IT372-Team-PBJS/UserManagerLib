@@ -1,0 +1,3 @@
+cd c:\xampp\PHP\htdocs\LoginLib
+
+phpdoc -d LoginLib/ -t PHPDocs/
