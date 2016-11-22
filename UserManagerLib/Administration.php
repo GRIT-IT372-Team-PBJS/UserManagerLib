@@ -4,10 +4,12 @@ require_once 'Database.php';
 require_once 'Authentication.php';
 require_once 'User.php';
 require_once 'EditCurrentUserInfo.php';
+require_once "HelperFunctions.php";
+require_once "Registration.php";
 
 /**
  * Created by PhpStorm.
- * User: Benjamin Arnold
+ * User: Benjamin Arnold <benji.arnold@gmail.com>
  * Date: 11/11/2016
  * Time: 2:53 PM
  */
@@ -29,19 +31,19 @@ class Administration extends EditCurrentUserInfo {
     }
 
     /**
-     * Creates User from UserObject I presume?
+     * Creates User
      */
-    public function createUser() {
+    public function createUser($firstName, $middleName, $lastName, $email, $type, $hashedPassword) {
 
-        //creates user
+        Registration::addNewUserToDB($firstName, $middleName, $lastName, $email, $type, $hashedPassword);
     }
 
     /**
-     * Edits user type.  Unused, field not present in database
+     * Edits user type.
      */
-    public function editUserType() {
+    public function editUserType($email, $authType) {
 
-        //edits user type
+        Registration::setAuthTypeInDB($email, $authType);
     }
 
     /**
@@ -50,7 +52,8 @@ class Administration extends EditCurrentUserInfo {
     public function editUserAddRegistrationTo($userId, $websiteId) {
 
         $sql = "INSERT INTO user_site_xref (user_id, site_id) VALUES ($userId, $websiteId);";
-        $this->getDataWithTwoClauses($sql, $userId, $websiteId);
+        $results = $this->getDataWithTwoClauses($sql, $userId, $websiteId);
+        return $results;
     }
 
     /**
@@ -61,7 +64,8 @@ class Administration extends EditCurrentUserInfo {
     public function editUserRemoveRegistrationFrom($userId, $websiteId) {
 
         $sql = "DELETE FROM user_site_xref WHERE user_id = $userId AND site_id = $websiteId;";
-        $this->getDataWithTwoClauses($sql, $userId, $websiteId);
+        $results = $this->getDataWithTwoClauses($sql, $userId, $websiteId);
+        return $results;
     }
 
     /**
@@ -72,7 +76,8 @@ class Administration extends EditCurrentUserInfo {
 
         $sql = "SELECT lastname, firstname, middlename, email  FROM users WHERE " .
             "user_id = $userId ORDER BY lastname";
-        $this->getDataWithOneClause($sql, $userId);
+        $results = $this->getDataWithOneClause($sql, $userId);
+        return $results;
     }
 
     /**
@@ -83,7 +88,8 @@ class Administration extends EditCurrentUserInfo {
 
         $sql = "SELECT lastname, firstname, middlename, user_id FROM users WHERE " .
             "email = $userEmail ORDER BY lastname";
-        $this->getDataWithOneClause($sql, $userEmail);
+        $results = $this->getDataWithOneClause($sql, $userEmail);
+        return $results;
     }
 
     /**
@@ -95,7 +101,8 @@ class Administration extends EditCurrentUserInfo {
 
         $sql = "SELECT lastname, firstname, middlename, email, user_id FROM users WHERE " .
             " firstname = $userFirstName AND lastname = $userLastName ORDER BY lastname";
-        $this->getDataWithTwoClauses($sql, $userFirstName, $userLastName);
+        $results = $this->getDataWithTwoClauses($sql, $userFirstName, $userLastName);
+        return $results;
     }
 
     /**
@@ -106,7 +113,8 @@ class Administration extends EditCurrentUserInfo {
 
         $sql = "SELECT firstname, middlename, lastname, email, user_id FROM users WHERE " .
             "firstname LIKE " . "$searchLetter" . "% ORDER BY firstname ASC";
-        $this->getDataWithOneClause($sql, $searchLetter);
+        $results = $this->getDataWithOneClause($sql, $searchLetter);
+        return $results;
     }
 
     /**
@@ -117,7 +125,8 @@ class Administration extends EditCurrentUserInfo {
 
         $sql = "SELECT lastname, firstname, middlename, email, user_id FROM users WHERE lastname LIKE " .
             "$searchLetter" . "% ORDER BY lastname ASC";
-        $this->getDataWithOneClause($sql, $searchLetter);
+        $results = $this->getDataWithOneClause($sql, $searchLetter);
+        return $results;
     }
 
     /**
@@ -130,7 +139,8 @@ class Administration extends EditCurrentUserInfo {
             "users INNER JOIN users ON users.user_id = user_site_xref.user_id INNER JOIN sites ON " .
             "sites.site_id = user_site_xref.site_id WHERE site.site_name = $currentWebsite " .
             "ORDER BY lastname";
-        $this->getDataWithOneClause($sql, $currentWebsite);
+        $results = $this->getDataWithOneClause($sql, $currentWebsite);
+        return $results;
     }
 
     /**
@@ -139,7 +149,12 @@ class Administration extends EditCurrentUserInfo {
      */
     public function getUsersWithType($userType) {
 
-        //get users with type
+        $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id FROM " .
+            "users INNER JOIN users ON users.user_id = user_auth_xref.user_id INNER JOIN auth ON " .
+            "auth.auth_type = user_auth_xref.auth_type WHERE auth.auth_type = $userType " .
+            "ORDER BY lastname";
+        $results = $this->getDataWithOneClause($sql, $userType);
+        return $results;
     }
 
     /**
@@ -148,7 +163,8 @@ class Administration extends EditCurrentUserInfo {
     public function getWebsites() {
 
         $sql = "SELECT * FROM sites";
-        $this->getDataWithNoClause($sql);
+        $results = $this->getDataWithNoClause($sql);
+        return $results;
     }
 
     /**
@@ -164,23 +180,29 @@ class Administration extends EditCurrentUserInfo {
     /**
      * Executes SQL query that has no variable clauses
      * @param $sql
+     * @return $result
      */
     private function getDataWithNoClause($sql) {
 
         $statement = Database::getDBConnection()->prepare($sql);
         $statement->execute();
+        $result = $statement->fetch();
+        return $result;
     }
 
     /**
      * Executes SQL query that has one variable clause
      * @param $sql
      * @param $whereClause
+     * @return $result
      */
     private function getDataWithOneClause($sql, $variableClause) {
 
         $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam($variableClause, PDO::PARAM_STR);
         $statement->execute();
+        $result = $statement->fetch();
+        return $result;
     }
 
     /**
@@ -188,12 +210,15 @@ class Administration extends EditCurrentUserInfo {
      * @param $sql
      * @param $firstVariableClause
      * @param $secondVariableClause
+     * @return $result
      */
     private function getDataWithTwoClauses($sql, $firstVariableClause, $secondVariableClause) {
 
         $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam($firstVariableClause, $secondVariableClause, PDO::PARAM_STR);
         $statement->execute();
+        $result = $statement->fetch();
+        return $result;
     }
 }
 
