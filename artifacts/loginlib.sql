@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(125) NOT NULL,
   `firstname` varchar(255) NOT NULL,
   `lastname` varchar(255) NOT NULL,
-  `middename` varchar(255) DEFAULT NULL,
+  `middlename` varchar(255) DEFAULT NULL,
   `auth_type` varchar(20) NOT NULL,
   `password` varchar(255) NOT NULL,
   PRIMARY KEY (`user_id`),
