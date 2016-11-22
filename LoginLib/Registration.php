@@ -94,22 +94,43 @@ class Registration
     }
 
 
+    /**
+     * If registerer already exists in the database then there is no need to collect all data of that user.
+     * This method will associate this user as registered to the site it is registering for.
+     *
+     * Returns TRUE if method was successful.
+     * Returns FALSE if method was un-successful.
+     *
+     * @param $email
+     * @param $currentSite
+     * @return boolean
+     */
     public static function registerUserToSite($email, $currentSite)
     {
+        if(HelperFunctions::isUserInDB($email) && HelperFunctions::isValidSite($currentSite)) {
 
-        $sql = "INSERT INTO user_site_xref (user_id, site_id)
+            $sql = "INSERT INTO user_site_xref (user_id, site_id)
                 VALUES(:user_id, :site_id)";
 
-        $userId = HelperFunctions::getUserId($email);
-        $siteId = HelperFunctions::getSiteId($currentSite);
+            $userId = HelperFunctions::getUserId($email);
+            $siteId = HelperFunctions::getSiteId($currentSite);
 
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
-        $statement->bindParam(":site_id", $siteId, PDO::PARAM_INT);
-        $statement->execute();
+            $statement = Database::getDBConnection()->prepare($sql);
+            $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
+            $statement->bindParam(":site_id", $siteId, PDO::PARAM_INT);
+            $statement->execute();
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
+            //Uncomment the code below if you want to do error handling on this database call.
+            //print_r($statement->errorInfo());
+
+            return true;
+
+        } else {
+
+            return false;
+        }
+
+
     }
 
     private static function setAuthTypeInDB($email, $authType){

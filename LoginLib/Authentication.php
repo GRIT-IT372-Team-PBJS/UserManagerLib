@@ -7,13 +7,15 @@
  */
 
 /**
+ * @author Peter L. Kim <peterlk.dev@gmail.com>
+ *
  * Class Authentication (Singleton)
  *
  * This class is in charge of the sites authentication.
  * It takes care of the login and logout functions,
  * resets passwords and changes passwords and
  * keeps track of the current user. This class is a singleton
- * so that sessions dont end up overwritten unknowingly.
+ * so that sessions don't end up overwritten unknowingly.
  */
 
 //Required classes for this class.
@@ -27,75 +29,81 @@ class Authentication
     private $dbConnection;
 
     /**
-     * Logs in user and sets user session and credentials for the current user.
-     * Returns true if login was successful.
-     * Returns false if login was unsuccessful.
+     * Logs user in by checking if data is valid and if user exists. Sets user object into a session if login was successful.
      *
-     * @param $postEmail : Post data in the form of an email address.
-     * @param $postPassword : Post data in the form of a password.
-     * @param $currentSite : static input used to indicate which app user is trying to login to
-     * @param $authorizationType : This last parameter is optional, it allows you to set restrictions on what type of user can login.
+     * Returns TRUE if login was successful.
+     *
+     * Returns FALSE if login was un-successful.
+     *
+     * @param string $email Email is used as a username in all applications that use this library.
+     * @param string $password Password passed in from the login point.
+     * @param string $currentSite This data is NOT passed in by the user. The developer sets this statically. Pass it the unique site name given to your application, if you don't know it talk to your administrator and they will either create one for you or give you the credential for your app's site name.
+     * @param string $authorizationType This parameter is OPTIONAL, it allows you to set restrictions on what type of user can login. If no authorizationType is passed in then login will have no ristriction for users logging in.
      * @return Boolean
      */
-    public static function login($postEmail, $postPassword, $currentSite)
+    public function login($email, $password, $currentSite)
     {
         self::initializeAuthentication();
 
         if (!self::isLoggedIn()) {
 
-            $result = self::fetchUserDataFromDB($postEmail);
+            $result = self::fetchUserDataFromDB($email);
 
-            $middleName = isset($result["middlename"]) ? $result["middlename"] : "";
-            $firstName = isset($result["firstname"]) ? $result["firstname"] : "";
-            $lastName = isset($result["lastname"]) ? $result["lastname"] : "";
-            $email = isset($result["email"]) ?  $result["email"] : "";
-            $userId = isset($result["user_id"]) ? $result["user_id"] : "";
-            $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
+            if ($result != false) {
 
-            if (HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
+                $middleName = isset($result["middlename"]) ? $result["middlename"] : "";
+                $firstName = isset($result["firstname"]) ? $result["firstname"] : "";
+                $lastName = isset($result["lastname"]) ? $result["lastname"] : "";
+                $userId = isset($result["user_id"]) ? $result["user_id"] : "";
+                $authType = isset($result["auth_type"]) ? $result["auth_type"] : "";
 
-                if (self::isPasswordValid($result, $postPassword)) {
+                if (HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
 
-                    $isAuthenticationTypePassedIn = func_num_args() > 3;
+                    if (self::isPasswordValid($result, $password)) {
 
-                    if(!$isAuthenticationTypePassedIn) {
+                        $isAuthenticationTypePassedIn = func_num_args() > 3;
 
-                        self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $authType);
-                        Database::closeDBConnection();
-
-                        return true;
-
-                    } else if(func_num_args() == 4) {
-
-                        $authorizationType = func_get_arg(3);
-
-                        if($authType == $authorizationType && HelperFunctions::isValidType($authType)) {
+                        if (!$isAuthenticationTypePassedIn) {
 
                             self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $authType);
                             Database::closeDBConnection();
 
                             return true;
+                        }
+
+                        if ($isAuthenticationTypePassedIn) {
+
+                            $authorizationType = func_get_arg(3);
+
+                            if ($authType == $authorizationType && HelperFunctions::isValidType($authType)) {
+
+                                self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $authType);
+                                Database::closeDBConnection();
+
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
                         } else {
                             return false;
                         }
+                    } else {
+                        return false;
                     }
+
                 } else {
                     return false;
                 }
+
             } else {
                 return false;
             }
-        } else {
-            return false;
-        }
     }
 
-    /**
-     * Fetches user data from database and returns the results.
-     * @param $email : loginEmail
-     * @return $results : results in the database.
-     */
-    private static function fetchUserDataFromDB($email)
+    //gets all the data associated with the email in the database. If the email is valid in
+    //the database it returns the database results else returns a false boolean.
+    private function fetchUserDataFromDB($email)
     {
             $sql = "SELECT * FROM users WHERE email = :email";
             $auth = self::initializeAuthentication();
@@ -103,22 +111,18 @@ class Authentication
             $statement->bindParam(":email", $email, PDO::PARAM_STR);
             $statement->execute();
 
+            $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
             //Uncomment the code below if you want to do error handling on this database call.
             //print_r($statement->errorInfo());
 
-            $result = $statement->fetch();
+            $result = $isThereNoDatabaseErrors ? $statement->fetch() : false;
 
             return $result;
     }
 
-    /**
-     * Checks if password is valid.
-     * (verifies Hashed Passwords)
-     * @param $dbResults
-     * @param $loginPassword
-     * @return Boolean
-     */
-    private static function isPasswordValid($dbResults, $loginPassword)
+    //compares loginPassword with hashedPassword and sees if they are the same.
+    private function isPasswordValid($dbResults, $loginPassword)
     {
             if (password_verify($loginPassword, $dbResults["password"])) {
 
@@ -130,26 +134,19 @@ class Authentication
             }
     }
 
-    /**
-     * Builds and sets the current user.
-     * @param $firstName
-     * @param $middleName
-     * @param $lastName
-     * @param $email
-     * @param $userId
-     * @param $type
-     */
-    private static function setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $type)
+   //sets the current session, the session contains a user object.
+    private function setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $type)
     {
         $_SESSION["auth-current-user"] = new User($firstName, $middleName, $lastName, $email, $userId, $type);
     }
 
     /**
-     * Logs out user by un-setting the current user, user session, database connection and
-     * setting the instance to null.
-     * @param $redirectURL : This is an Optional parameter, Takes a string url and will redirect to that url upon logging out.
+     * Logs out user by destroying all sessions, closing the database connection and
+     * setting the instance of Authentication to null.
+     *
+     * @param string $redirectURL : This is an OPTIONAL parameter, Takes a string url and will redirect to that url upon logging out, If no parameter is passes in then logging out will not redirect you anywhere.
      */
-    public static function logout()
+    public function logout()
     {
 
         if (self::isLoggedIn()) {
@@ -168,21 +165,19 @@ class Authentication
 
     }
 
-    /**
-     * checks to see if a user is logged in.
-     * @return Boolean
-     */
-    private static function isLoggedIn()
+    //Checks if a user is logged in.
+    private function isLoggedIn()
     {
         return isset($_SESSION["auth-current-user"]);
     }
 
     /**
-     * This method is use when you want to restrict a page to users who are not logged in.
-     * @param $url : This is the location you want the user to redirect to if they are not an authorized user.
-     * @param $authType : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.
+     * This method is use when you want to restrict a page to users who are not logged in or users who do not have authorization to be on that page.
+     *
+     * @param string $url : This is the location you want the user to redirect to if they are not an authorized user.
+     * @param string $authType : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.
      */
-    public static function isValidUserElseRedirectTo($url) {
+    public function isValidUserElseRedirectTo($url) {
         if(self::isLoggedIn()){
 
             $userId = $_SESSION["auth-current-user"]->getUserId();
@@ -226,20 +221,26 @@ class Authentication
     /**
      * Updates the current user's password in the database. If the user is logged in and
      * The new password is valid, the password is changed.
-     * Returns true if change was successful.
-     * Returns false if change was unsuccessful.
+     * NOTE: Password has to be at least 8 characters long, contain at least 1 uppercase letter and 1 lowercase letter and 1 digit.
      *
-     * @param $newPassword : The new password to be put into the database.
+     * Returns TRUE if change was successful.
+     *
+     * Returns FALSE if change was unsuccessful.
+     *
+     * @param string $newPassword : The new password to be put into the database.
      * @return Boolean
      */
-    public static function changePassword($newPassword)
+    public function changePassword($newPassword)
     {
         if (self::isLoggedIn() && HelperFunctions::isPasswordValid($newPassword)){
 
-            self::updatePasswordInDB($newPassword);
-            Database::closeDBConnection();
+            if (self::updatePasswordInDB($newPassword)) {
+                Database::closeDBConnection();
 
-            return true;
+                return true;
+            } else {
+                return false;
+            }
 
         } else {
 
@@ -247,11 +248,8 @@ class Authentication
         }
     }
 
-    /**
-     * Updates the password in the database.
-     * @param $newPassword
-     */
-    private static function updatePasswordInDB($newPassword)
+    //updates password in database, returns true if update was successful returns false if update was unsuccessful.
+    private function updatePasswordInDB($newPassword)
     {
             $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $userId = $_SESSION["auth-current-user"]->getUserId();
@@ -263,25 +261,22 @@ class Authentication
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
 
+            $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
             //Uncomment the code below if you want to do error handling on this database call.
             //print_r($statement->errorInfo());
 
+            return $isThereNoDatabaseErrors;
     }
 
-    /**
-     * destroys session.
-     */
-    private static function unsetUserSession()
+    //destroys all sessions
+    private function unsetUserSession()
     {
         session_destroy();
     }
 
-    /**
-     * Gets the instance of the class.
-     * (Singleton Method)
-     * @return Authentication
-     */
-    private static function getInstance()
+   //gets instance of the Authentication class
+    private function getInstance()
     {
         if (self::$instance == null) {
 
@@ -291,10 +286,8 @@ class Authentication
         return self::$instance;
     }
 
-    /**
-     * Initializes the Authentication class and also sets the database connection.
-     */
-    private static function initializeAuthentication()
+    //Initializes the Authentication class and also sets the database connection.
+    private function initializeAuthentication()
     {
         $auth = self::getInstance();
         $auth->dbConnection = Database::getDBConnection();
@@ -303,27 +296,40 @@ class Authentication
     }
 
     /**
-     * Resets the password with a generated password and emails the new password to the user.
-     * @param $email : the email address of the user who forgot their password.
+     * Resets the password with a generated password and emails the new password to the user. The user is then expected to log in and use the change password feature.
+     *
+     * Returns TRUE if user has an account.
+     *
+     * Returns FALSE if user does NOT have an account.
+     *
+     * @param string $email : the email address of the user who forgot their password.
+     * @return Boolean
      */
-    public static function forgotPassword($email){
+    public function forgotPassword($email){
 
-        $generatedPass = self::generate_password();
-        self::insertGeneratedPasswordIntoDB($generatedPass, $email);
+        if (HelperFunctions::isUserInDB($email)) {
 
-        $to      = $email;
-        $subject = 'Password Reset - Green River Tech';
-        $message = 'Hi GR Student,' . "\r\n"
-        . "\r\n" . "You have submitted a password change request. Here is your new password: " . "\r\n" . "\r\n" . $generatedPass . "\r\n" . "\r\n" . "Login with this password and change the password to anything you would like.";
-        $headers = 'From: noreply@greenrivertech.net' . "\r\n" .
-            'Reply-To: noreply@greenrivertech.net' . "\r\n" .
-            'X-Mailer: PHP/' . phpversion();
+            $generatedPass = self::generate_password();
+            self::insertGeneratedPasswordIntoDB($generatedPass, $email);
 
-        mail($to, $subject, $message, $headers);
+            $to      = $email;
+            $subject = 'Password Reset - Green River Tech';
+            $message = 'Hi GR Student,' . "\r\n"
+                . "\r\n" . "You have submitted a password change request. Here is your new password: " . "\r\n" . "\r\n" . $generatedPass . "\r\n" . "\r\n" . "Login with this password and change the password to anything you would like.";
+            $headers = 'From: noreply@greenrivertech.net' . "\r\n" .
+                'Reply-To: noreply@greenrivertech.net' . "\r\n" .
+                'X-Mailer: PHP/' . phpversion();
 
+            mail($to, $subject, $message, $headers);
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    private static function insertGeneratedPasswordIntoDB($generatedPass, $email) {
+    //inserts newly generated password replacing the users old password.
+    private function insertGeneratedPasswordIntoDB($generatedPass, $email) {
 
         $generatedPass = password_hash($generatedPass, PASSWORD_DEFAULT);
 
@@ -338,7 +344,8 @@ class Authentication
         //print_r($statement->errorInfo());
     }
 
-    private static function generate_password($length = 10){
+    //Generates a random password of length 10.
+    private function generate_password($length = 10){
 
         $chars =  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.
             '0123456789`-=~!@#$%^&*()_+,./<>?;:[]{}\|';
@@ -351,6 +358,4 @@ class Authentication
 
         return $str;
     }
-
-
 }

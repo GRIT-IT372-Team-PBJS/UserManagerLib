@@ -2,14 +2,14 @@
 
                     require_once "../LoginLib/Authentication.php";
                     session_start();
-
+                    $login = new Authentication;
                     $currentPassword =  password_hash("get2work", PASSWORD_DEFAULT);
                     $siteName = "it-connect";
 
 
                     if(isset($_POST["submit"])){
 
-                        Authentication::login(/*"pk2@gmail.com"*/ $_POST["email"], /*"get2work"*/ $_POST["password"], $siteName);
+                        $login->login(/*"pk2@gmail.com"*/ $_POST["email"], /*"get2work"*/ $_POST["password"], $siteName);
                     }
 
                     echo isset($_SESSION["auth-current-user"]) ? $_SESSION["auth-current-user"]->getFirstName() : "No Data";

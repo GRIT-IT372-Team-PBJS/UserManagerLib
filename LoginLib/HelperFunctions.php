@@ -54,10 +54,12 @@ class HelperFunctions
         $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
         $statement->execute();
 
+        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
         //Uncomment the code below if you want to do error handling on this database call.
         //print_r($statement->errorInfo());
 
-        if($statement->fetchColumn() > 0) {
+        if($statement->fetchColumn() > 0 && $isThereNoDatabaseErrors) {
 
             return true;
 
@@ -75,12 +77,14 @@ class HelperFunctions
         $statement->bindParam(":email", $email, PDO::PARAM_STR);
         $statement->execute();
 
+        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
         //Uncomment the code below if you want to do error handling on this database call.
         //print_r($statement->errorInfo());
 
         $rowCount = $statement->fetchColumn();
 
-        if ($rowCount > 0){
+        if ($rowCount > 0 && $isThereNoDatabaseErrors){
             return true;
         } else {
             return false;
@@ -129,12 +133,15 @@ class HelperFunctions
         $statement->bindParam(":site_name", $currentSite, PDO::PARAM_STR);
         $statement->execute();
 
+        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
         //Uncomment the code below if you want to do error handling on this database call.
         //print_r($statement->errorInfo());
 
         $isValidSite = $statement->fetchColumn() > 0;
 
-        return $isValidSite;
+
+        return $isValidSite && $isThereNoDatabaseErrors;
     }
 
     public static function isValidType($type)
@@ -145,12 +152,14 @@ class HelperFunctions
         $statement->bindParam(":auth_type", $type, PDO::PARAM_STR);
         $statement->execute();
 
+        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
         //Uncomment the code below if you want to do error handling on this database call.
         //print_r($statement->errorInfo());
 
         $isValidType = $statement->fetchColumn() > 0;
 
-        return $isValidType;
+        return $isValidType && $isThereNoDatabaseErrors;
 
     }
 

@@ -1,8 +1,9 @@
 <?php
     require_once "../LoginLib/Authentication.php";
     session_start();
+    $pageValidation = new Authentication();
 
-    Authentication::isValidUserElseRedirectTo("login-page.php");
+    $pageValidation->isValidUserElseRedirectTo("login-page.php");
 
     if(isset($_POST["logout"])){
         echo "hello";
