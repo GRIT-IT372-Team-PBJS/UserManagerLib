@@ -3,7 +3,7 @@
 require_once 'Database.php';
 require_once 'Authentication.php';
 require_once 'User.php';
-require_once 'UserFunctions.php';
+require_once 'EditCurrentUserInfo.php';
 
 /**
  * Created by PhpStorm.
@@ -11,19 +11,21 @@ require_once 'UserFunctions.php';
  * Date: 11/11/2016
  * Time: 2:53 PM
  */
-class AdminFunctions extends UserFunctions {
-    private $isAuthorized;
+class Administration extends EditCurrentUserInfo {
 
     //Apparently required to run queries?
-    private $dbConnection;
+
     private $currentUser;
 
     /**
      * AdminFunctions constructor.  Apparently required?
      */
     public function __construct(){
-        $this->dbConnection = Database::getDBConnection();
-        $this->currentUser = Authentication::getCurrentUser();
+
+        if(HelperFunctions::isLoggedIn()) {
+            $_SESSION["auth-current-user"] = Authentication::getCurrentUser();
+        }
+
     }
 
     /**
@@ -165,7 +167,7 @@ class AdminFunctions extends UserFunctions {
      */
     private function getDataWithNoClause($sql) {
 
-        $statement = $this->dbConnection->prepare($sql);
+        $statement = Database::getDBConnection()->prepare($sql);
         $statement->execute();
     }
 
@@ -176,7 +178,7 @@ class AdminFunctions extends UserFunctions {
      */
     private function getDataWithOneClause($sql, $variableClause) {
 
-        $statement = $this->dbConnection->prepare($sql);
+        $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam($variableClause, PDO::PARAM_STR);
         $statement->execute();
     }
@@ -189,7 +191,7 @@ class AdminFunctions extends UserFunctions {
      */
     private function getDataWithTwoClauses($sql, $firstVariableClause, $secondVariableClause) {
 
-        $statement = $this->dbConnection->prepare($sql);
+        $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam($firstVariableClause, $secondVariableClause, PDO::PARAM_STR);
         $statement->execute();
     }

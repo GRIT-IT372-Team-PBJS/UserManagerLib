@@ -1,5 +1,5 @@
 <?php
-    require_once "../LoginLib/Authentication.php";
+    require_once "../UserManagerLib/Authentication.php";
     session_start();
 
     Authentication::isValidUserElseRedirectTo("login-page.php");

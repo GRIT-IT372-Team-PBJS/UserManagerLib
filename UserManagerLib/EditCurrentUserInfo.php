@@ -5,7 +5,7 @@ require_once "Authentication.php";
 require_once "User.php";
 require_once "HelperFunctions.php";
 
-class UserFunctions{
+class EditCurrentUserInfo{
 
 //Unsure of whether these are really necessary if we do use includes.
 private $currentUser;

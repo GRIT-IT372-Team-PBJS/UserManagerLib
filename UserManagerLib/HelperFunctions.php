@@ -12,7 +12,8 @@ require_once "Database.php";
 /**
  * Class HelperFunctions
  *
- * This class is used to give database utility to other developers using this site.
+ * This class is used to give database utility to other developers using this library.
+ *
  */
 class HelperFunctions
 {
@@ -198,6 +199,17 @@ class HelperFunctions
         $isValidPassword = preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/", $password);
 
         return $isValidPassword;
+    }
+
+    /**
+     * Checks to see if a user is logged in.
+     *
+     * @return Boolean
+     */
+    public static function isLoggedIn()
+    {
+        //checks if the session is set and if the session is set with the correct type.
+        return isset($_SESSION["auth-current-user"]) && $_SESSION["auth-current-user"] instanceof User;
     }
 
 

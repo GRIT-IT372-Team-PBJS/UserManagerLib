@@ -1,6 +1,6 @@
 <?php
 
-                    require_once "../LoginLib/Authentication.php";
+                    require_once "../UserManagerLib/Authentication.php";
                     session_start();
                     $login = new Authentication;
                     $currentPassword =  password_hash("get2work", PASSWORD_DEFAULT);

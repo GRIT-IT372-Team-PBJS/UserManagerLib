@@ -44,6 +44,7 @@ class Registration
 
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
+                //checks if none of the DB queries failed while running the sql. If any of them failed return false.
                 if( self::addNewUserToDB($firstName, $middleName, $lastName, $email, $authType, $hashedPassword) &&
                     self::registerExistingUser($email, $currentSite) &&
                     self::setAuthTypeInDB($email, $authType)){

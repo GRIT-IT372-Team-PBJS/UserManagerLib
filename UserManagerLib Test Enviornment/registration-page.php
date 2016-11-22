@@ -1,6 +1,6 @@
 <?php
 
-require_once "../LoginLib/Registration.php";
+require_once "../UserManagerLib/Registration.php";
 session_start();
 
 $siteName = "it-connect";
