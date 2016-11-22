@@ -7,15 +7,14 @@
  */
 
 /**
- * @author Peter L. Kim <peterlk.dev@gmail.com>
+ * @Author Peter L. Kim <peterlk.dev@gmail.com>
  *
- * Class Authentication (Singleton)
+ * Class Authentication
  *
  * This class is in charge of the sites authentication.
  * It takes care of the login and logout functions,
  * resets passwords and changes passwords and
- * keeps track of the current user. This class is a singleton
- * so that sessions don't end up overwritten unknowingly.
+ * keeps track of the current user.
  */
 
 //Required classes for this class.
@@ -25,8 +24,6 @@ require_once "HelperFunctions.php";
 
 class Authentication
 {
-    private static $instance;
-    private $dbConnection;
 
     /**
      * Logs user in by checking if data is valid and if user exists. Sets user object into a session if login was successful.
@@ -41,9 +38,8 @@ class Authentication
      * @param string $authorizationType This parameter is OPTIONAL, it allows you to set restrictions on what type of user can login. If no authorizationType is passed in then login will have no ristriction for users logging in.
      * @return Boolean
      */
-    public function login($email, $password, $currentSite)
+    public static function login($email, $password, $currentSite)
     {
-        self::initializeAuthentication();
 
         if (!self::isLoggedIn()) {
 
@@ -103,11 +99,10 @@ class Authentication
 
     //gets all the data associated with the email in the database. If the email is valid in
     //the database it returns the database results else returns a false boolean.
-    private function fetchUserDataFromDB($email)
+    private static function fetchUserDataFromDB($email)
     {
             $sql = "SELECT * FROM users WHERE email = :email";
-            $auth = self::initializeAuthentication();
-            $statement = $auth->dbConnection->prepare($sql);
+            $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":email", $email, PDO::PARAM_STR);
             $statement->execute();
 
@@ -122,7 +117,7 @@ class Authentication
     }
 
     //compares loginPassword with hashedPassword and sees if they are the same.
-    private function isPasswordValid($dbResults, $loginPassword)
+    private static function isPasswordValid($dbResults, $loginPassword)
     {
             if (password_verify($loginPassword, $dbResults["password"])) {
 
@@ -135,7 +130,7 @@ class Authentication
     }
 
    //sets the current session, the session contains a user object.
-    private function setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $type)
+    private static function setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $type)
     {
         $_SESSION["auth-current-user"] = new User($firstName, $middleName, $lastName, $email, $userId, $type);
     }
@@ -146,7 +141,7 @@ class Authentication
      *
      * @param string $redirectURL : This is an OPTIONAL parameter, Takes a string url and will redirect to that url upon logging out, If no parameter is passes in then logging out will not redirect you anywhere.
      */
-    public function logout()
+    public static function logout()
     {
 
         if (self::isLoggedIn()) {
@@ -166,7 +161,7 @@ class Authentication
     }
 
     //Checks if a user is logged in.
-    private function isLoggedIn()
+    private static function isLoggedIn()
     {
         return isset($_SESSION["auth-current-user"]);
     }
@@ -177,14 +172,13 @@ class Authentication
      * @param string $url : This is the location you want the user to redirect to if they are not an authorized user.
      * @param string $authType : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.
      */
-    public function isValidUserElseRedirectTo($url) {
+    public static function isValidUserElseRedirectTo($url) {
         if(self::isLoggedIn()){
 
             $userId = $_SESSION["auth-current-user"]->getUserId();
 
             $sql = "SELECT count(*) FROM users WHERE user_id = :user_id";
-            $auth = self::initializeAuthentication();
-            $statement = $auth->dbConnection->prepare($sql);
+            $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
 
@@ -230,7 +224,7 @@ class Authentication
      * @param string $newPassword : The new password to be put into the database.
      * @return Boolean
      */
-    public function changePassword($newPassword)
+    public static function changePassword($newPassword)
     {
         if (self::isLoggedIn() && HelperFunctions::isPasswordValid($newPassword)){
 
@@ -249,14 +243,13 @@ class Authentication
     }
 
     //updates password in database, returns true if update was successful returns false if update was unsuccessful.
-    private function updatePasswordInDB($newPassword)
+    private static function updatePasswordInDB($newPassword)
     {
             $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $userId = $_SESSION["auth-current-user"]->getUserId();
 
             $sql = "UPDATE users SET password = :password WHERE user_id = :user_id";
-            $auth = self::initializeAuthentication();
-            $statement = $auth->dbConnection->prepare($sql);
+            $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":password", $newPassword, PDO::PARAM_STR);
             $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
             $statement->execute();
@@ -270,7 +263,7 @@ class Authentication
     }
 
     //destroys all sessions
-    private function unsetUserSession()
+    private static function unsetUserSession()
     {
         session_destroy();
     }
@@ -284,15 +277,6 @@ class Authentication
         }
 
         return self::$instance;
-    }
-
-    //Initializes the Authentication class and also sets the database connection.
-    private function initializeAuthentication()
-    {
-        $auth = self::getInstance();
-        $auth->dbConnection = Database::getDBConnection();
-
-        return $auth;
     }
 
     /**
@@ -334,8 +318,7 @@ class Authentication
         $generatedPass = password_hash($generatedPass, PASSWORD_DEFAULT);
 
         $sql = "UPDATE users SET password = :password WHERE email = :email";
-        $auth = self::initializeAuthentication();
-        $statement = $auth->dbConnection->prepare($sql);
+        $statement = Database::getDBConnection()->prepare($sql);
         $statement->bindParam(":password", $generatedPass, PDO::PARAM_STR);
         $statement->bindParam(":email", $email, PDO::PARAM_STR);
         $statement->execute();
