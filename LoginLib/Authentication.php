@@ -6,22 +6,21 @@
  * Time: 10:10 PM
  */
 
-/**
- * @Author Peter L. Kim <peterlk.dev@gmail.com>
- *
- * Class Authentication
- *
- * This class is in charge of the sites authentication.
- * It takes care of the login and logout functions,
- * resets passwords and changes passwords and
- * keeps track of the current user.
- */
-
 //Required classes for this class.
 require_once "Database.php";
 require_once "User.php";
 require_once "HelperFunctions.php";
 
+/**
+ * Class Authentication
+ *
+ * This class is in charge of the sites authentication.
+ * It takes care of the login and logout functions,
+ * resets passwords and changes passwords and
+ * has a forgot password method.
+ *
+ * @author Peter L. Kim <peterlk.dev@gmail.com>
+ */
 class Authentication
 {
 

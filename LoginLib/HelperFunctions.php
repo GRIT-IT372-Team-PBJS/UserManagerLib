@@ -8,8 +8,22 @@
  */
 
 require_once "Database.php";
+
+/**
+ * Class HelperFunctions
+ *
+ * This class is used to give database utility to other developers using this site.
+ */
 class HelperFunctions
 {
+    /**
+     * Gets the site id associated with the site name passed in.
+     *
+     * Returns a site_id if siteName is valid.
+     *
+     * @param $siteName name of site.
+     * @return int
+     */
     public static function getSiteId($siteName){
 
         $sql = "SELECT site_id FROM sites WHERE site_name = :site_name";
@@ -26,6 +40,14 @@ class HelperFunctions
 
     }
 
+    /**
+     * Gets the user id associated with the email passed in.
+     *
+     * Returns a user_id if email is valid.
+     *
+     * @param $email email of user.
+     * @return int
+     */
     public static function getUserId($email){
 
         $sql = "SELECT user_id FROM users WHERE email = :email";

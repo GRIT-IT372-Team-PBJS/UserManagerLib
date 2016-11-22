@@ -8,7 +8,7 @@ $siteName = "it-connect";
 
 if(isset($_POST["submit"])){
 
-    echo Registration::registerUser("fnameff", "mnameff", "lnameff", "test2@gmail.com", $siteName, "Get2Work");
+    echo Registration::registerNewUser("fnameff", "mnameff", "lnameff", "test2@gmail.com", $siteName, "Get2Work");
 }
 
 

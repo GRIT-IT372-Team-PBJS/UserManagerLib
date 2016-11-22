@@ -11,7 +11,9 @@
  * Class Database (Singleton)
  *
  * This class manages the database connection on all sites that use it
- * and make sure there is only one instance of it at all times.
+ * and makes sure there is only one instance of it at all times.
+ *
+ * @author Peter L. Kim <peterlk.dev@gmail.com>
  */
 class Database
 {

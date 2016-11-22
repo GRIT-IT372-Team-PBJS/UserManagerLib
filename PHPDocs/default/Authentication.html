@@ -6,8 +6,13 @@
 						
 					</div><div class="info-box-body">
         		<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Class Authentication</p>
+<p class="description"><p>This class is in charge of the sites authentication.  It takes care of the login and logout functions,  resets passwords and changes passwords and  keeps track of the current user.</p></p>
+	<ul class="tags">
+				<li><span class="field">author:</span> Peter L. Kim &lt;<a href="mailto:peterlk.dev@gmail.com">peterlk.dev@gmail.com</a>&gt;</li>
+			</ul>
 		<p class="notes">
-			Located in <a class="field" href="_Authentication.php.html">/Authentication.php</a> (line <span class="field">26</span>)
+			Located in <a class="field" href="_Authentication.php.html">/Authentication.php</a> (line <span class="field">24</span>)
 		</p>
 		
 				
@@ -21,33 +26,33 @@
 	<a name="sec-method-summary"></a><div class="info-box"><div class="info-box-title">Method Summary</span></div><div class="nav-bar"><a href="#sec-description">Description</a> |
 												<span class="disabled">Methods</span> (<a href="#sec-methods">details</a>)
 		</div><div class="info-box-body"><div class="method-summary">
-																																												
 												<div class="method-definition">
-											<span class="method-result">Boolean</span>
+					static 						<span class="method-result">Boolean</span>
 										<a href="#changePassword" title="details" class="method-name">changePassword</a>
 											(<span class="var-type">string</span>&nbsp;<span class="var-name">$newPassword</span>)
 									</div>
-																<div class="method-definition">
-											<span class="method-result">Boolean</span>
-										<a href="#forgotPassword" title="details" class="method-name">forgotPassword</a>
-											(<span class="var-type">string</span>&nbsp;<span class="var-name">$email</span>)
-									</div>
-																<div class="method-definition">
-											<span class="method-result">void</span>
+																								<div class="method-definition">
+					static 						<span class="method-result">void</span>
 										<a href="#isValidUserElseRedirectTo" title="details" class="method-name">isValidUserElseRedirectTo</a>
 											(<span class="var-type">string</span>&nbsp;<span class="var-name">$url</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$authType</span>)
 									</div>
 																<div class="method-definition">
-											<span class="method-result">Boolean</span>
+					static 						<span class="method-result">Boolean</span>
 										<a href="#login" title="details" class="method-name">login</a>
 											(<span class="var-type">string</span>&nbsp;<span class="var-name">$email</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$password</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$currentSite</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$authorizationType</span>)
 									</div>
 																<div class="method-definition">
-											<span class="method-result">void</span>
+					static 						<span class="method-result">void</span>
 										<a href="#logout" title="details" class="method-name">logout</a>
 											(<span class="var-type">string</span>&nbsp;<span class="var-name">$redirectURL</span>)
 									</div>
-								</div></div></div>		
+								
+																				<div class="method-definition">
+											<span class="method-result">Boolean</span>
+										<a href="#forgotPassword" title="details" class="method-name">forgotPassword</a>
+											(<span class="var-type">string</span>&nbsp;<span class="var-name">$email</span>)
+									</div>
+																																</div></div></div>		
 
 	
 	<a name="sec-methods"></a><div class="info-box"><div class="info-box-title">Methods</div><div class="nav-bar"><a href="#sec-description">Description</a> |
@@ -55,8 +60,7 @@
 						
 		</div><div class="info-box-body">
 			<A NAME='method_detail'></A>
-
-<a name="methodchangePassword" id="changePassword"><!-- --></a><div class="evenrow"><div class="method-header"><span class="method-title">changePassword</span> (line <span class="line-number">233</span>)
+<a name="methodchangePassword" id="changePassword"><!-- --></a><div class="evenrow"><div class="method-header"><span class="method-title">static method changePassword</span> (line <span class="line-number">226</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -66,7 +70,9 @@
 				<li><span class="field">access:</span> public</li>
 			</ul>
 	
-	<div class="method-signature"><span class="method-result">Boolean</span><span class="method-name">
+	<div class="method-signature">
+	    static
+		<span class="method-result">Boolean</span><span class="method-name">
 			changePassword
 		</span>
 					(<span class="var-type">string</span>&nbsp;<span class="var-name">$newPassword</span>)
@@ -78,7 +84,82 @@
 		
 			
 	</div>
-<a name="methodforgotPassword" id="forgotPassword"><!-- --></a><div class="oddrow"><div class="method-header"><span class="method-title">forgotPassword</span> (line <span class="line-number">308</span>)
+<a name="methodisValidUserElseRedirectTo" id="isValidUserElseRedirectTo"><!-- --></a><div class="oddrow"><div class="method-header"><span class="method-title">static method isValidUserElseRedirectTo</span> (line <span class="line-number">174</span>)
+	</div> 
+	
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">This method is use when you want to restrict a page to users who are not logged in or users who do not have authorization to be on that page.</p>
+	<ul class="tags">
+				<li><span class="field">access:</span> public</li>
+			</ul>
+	
+	<div class="method-signature">
+	    static
+		<span class="method-result">void</span><span class="method-name">
+			isValidUserElseRedirectTo
+		</span>
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$url</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$authType</span>)
+			</div>
+	
+			<ul class="parameters">
+					<li><span class="var-type">string</span><span class="var-name">$url</span><span class="var-description">: : This is the location you want the user to redirect to if they are not an authorized user.</span>			</li>
+					<li><span class="var-type">string</span><span class="var-name">$authType</span><span class="var-description">: : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.</span>			</li>
+				</ul>
+		
+			
+	</div>
+<a name="methodlogin" id="login"><!-- --></a><div class="evenrow"><div class="method-header"><span class="method-title">static method login</span> (line <span class="line-number">40</span>)
+	</div> 
+	
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Logs user in by checking if data is valid and if user exists. Sets user object into a session if login was successful.</p>
+<p class="description"><p>Returns TRUE if login was successful.</p><p>Returns FALSE if login was un-successful.</p></p>
+	<ul class="tags">
+				<li><span class="field">access:</span> public</li>
+			</ul>
+	
+	<div class="method-signature">
+	    static
+		<span class="method-result">Boolean</span><span class="method-name">
+			login
+		</span>
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$email</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$password</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$currentSite</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$authorizationType</span>)
+			</div>
+	
+			<ul class="parameters">
+					<li><span class="var-type">string</span><span class="var-name">$email</span><span class="var-description">: Email is used as a username in all applications that use this library.</span>			</li>
+					<li><span class="var-type">string</span><span class="var-name">$password</span><span class="var-description">: Password passed in from the login point.</span>			</li>
+					<li><span class="var-type">string</span><span class="var-name">$currentSite</span><span class="var-description">: This data is NOT passed in by the user. The developer sets this statically. Pass it the unique site name given to your application, if you don't know it talk to your administrator and they will either create one for you or give you the credential for your app's site name.</span>			</li>
+					<li><span class="var-type">string</span><span class="var-name">$authorizationType</span><span class="var-description">: This parameter is OPTIONAL, it allows you to set restrictions on what type of user can login. If no authorizationType is passed in then login will have no ristriction for users logging in.</span>			</li>
+				</ul>
+		
+			
+	</div>
+<a name="methodlogout" id="logout"><!-- --></a><div class="oddrow"><div class="method-header"><span class="method-title">static method logout</span> (line <span class="line-number">143</span>)
+	</div> 
+	
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Logs out user by destroying all sessions, closing the database connection and  setting the instance of Authentication to null.</p>
+	<ul class="tags">
+				<li><span class="field">access:</span> public</li>
+			</ul>
+	
+	<div class="method-signature">
+	    static
+		<span class="method-result">void</span><span class="method-name">
+			logout
+		</span>
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$redirectURL</span>)
+			</div>
+	
+			<ul class="parameters">
+					<li><span class="var-type">string</span><span class="var-name">$redirectURL</span><span class="var-description">: : This is an OPTIONAL parameter, Takes a string url and will redirect to that url upon logging out, If no parameter is passes in then logging out will not redirect you anywhere.</span>			</li>
+				</ul>
+		
+			
+	</div>
+
+<a name="methodforgotPassword" id="forgotPassword"><!-- --></a><div class="evenrow"><div class="method-header"><span class="method-title">forgotPassword</span> (line <span class="line-number">291</span>)
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
@@ -100,78 +181,10 @@
 		
 			
 	</div>
-<a name="methodisValidUserElseRedirectTo" id="isValidUserElseRedirectTo"><!-- --></a><div class="evenrow"><div class="method-header"><span class="method-title">isValidUserElseRedirectTo</span> (line <span class="line-number">180</span>)
-	</div> 
-	
-	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">This method is use when you want to restrict a page to users who are not logged in or users who do not have authorization to be on that page.</p>
-	<ul class="tags">
-				<li><span class="field">access:</span> public</li>
-			</ul>
-	
-	<div class="method-signature"><span class="method-result">void</span><span class="method-name">
-			isValidUserElseRedirectTo
-		</span>
-					(<span class="var-type">string</span>&nbsp;<span class="var-name">$url</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$authType</span>)
-			</div>
-	
-			<ul class="parameters">
-					<li><span class="var-type">string</span><span class="var-name">$url</span><span class="var-description">: : This is the location you want the user to redirect to if they are not an authorized user.</span>			</li>
-					<li><span class="var-type">string</span><span class="var-name">$authType</span><span class="var-description">: : This is an OPTIONAL field, only use it if you want to restrict access to specific types of users.</span>			</li>
-				</ul>
-		
-			
-	</div>
-<a name="methodlogin" id="login"><!-- --></a><div class="oddrow"><div class="method-header"><span class="method-title">login</span> (line <span class="line-number">44</span>)
-	</div> 
-	
-	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Logs user in by checking if data is valid and if user exists. Sets user object into a session if login was successful.</p>
-<p class="description"><p>Returns TRUE if login was successful.</p><p>Returns FALSE if login was un-successful.</p></p>
-	<ul class="tags">
-				<li><span class="field">access:</span> public</li>
-			</ul>
-	
-	<div class="method-signature"><span class="method-result">Boolean</span><span class="method-name">
-			login
-		</span>
-					(<span class="var-type">string</span>&nbsp;<span class="var-name">$email</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$password</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$currentSite</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$authorizationType</span>)
-			</div>
-	
-			<ul class="parameters">
-					<li><span class="var-type">string</span><span class="var-name">$email</span><span class="var-description">: Email is used as a username in all applications that use this library.</span>			</li>
-					<li><span class="var-type">string</span><span class="var-name">$password</span><span class="var-description">: Password passed in from the login point.</span>			</li>
-					<li><span class="var-type">string</span><span class="var-name">$currentSite</span><span class="var-description">: This data is NOT passed in by the user. The developer sets this statically. Pass it the unique site name given to your application, if you don't know it talk to your administrator and they will either create one for you or give you the credential for your app's site name.</span>			</li>
-					<li><span class="var-type">string</span><span class="var-name">$authorizationType</span><span class="var-description">: This parameter is OPTIONAL, it allows you to set restrictions on what type of user can login. If no authorizationType is passed in then login will have no ristriction for users logging in.</span>			</li>
-				</ul>
-		
-			
-	</div>
-<a name="methodlogout" id="logout"><!-- --></a><div class="evenrow"><div class="method-header"><span class="method-title">logout</span> (line <span class="line-number">149</span>)
-	</div> 
-	
-	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Logs out user by destroying all sessions, closing the database connection and  setting the instance of Authentication to null.</p>
-	<ul class="tags">
-				<li><span class="field">access:</span> public</li>
-			</ul>
-	
-	<div class="method-signature"><span class="method-result">void</span><span class="method-name">
-			logout
-		</span>
-					(<span class="var-type">string</span>&nbsp;<span class="var-name">$redirectURL</span>)
-			</div>
-	
-			<ul class="parameters">
-					<li><span class="var-type">string</span><span class="var-name">$redirectURL</span><span class="var-description">: : This is an OPTIONAL parameter, Takes a string url and will redirect to that url upon logging out, If no parameter is passes in then logging out will not redirect you anywhere.</span>			</li>
-				</ul>
-		
-			
-	</div>
 						
 		</div></div>
 
 
 	<p class="notes" id="credit">
-		Documentation generated on Tue, 22 Nov 2016 02:09:58 +0100 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.4</a></p>
+		Documentation generated on Tue, 22 Nov 2016 06:44:57 +0100 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.4.4</a></p>
 	</div></body></html>
