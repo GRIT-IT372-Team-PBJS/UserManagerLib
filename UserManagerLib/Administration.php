@@ -1,9 +1,7 @@
 <?php
 
 require_once 'Database.php';
-require_once 'Authentication.php';
 require_once 'User.php';
-require_once 'EditCurrentUserInfo.php';
 require_once "HelperFunctions.php";
 require_once "Registration.php";
 
@@ -13,46 +11,34 @@ require_once "Registration.php";
  * Date: 11/11/2016
  * Time: 2:53 PM
  */
-class Administration extends EditCurrentUserInfo {
+class Administration
+{
+    //setting up prepared statement placeholders to make my sql quires dynamic.
+    const PREPARED_STATEMENT_1 = ":prepared_1";
+    const PREPARED_STATEMENT_2 = ":prepared_2";
 
-    //Apparently required to run queries?
 
-    private $currentUser;
-
-    /**
-     * AdminFunctions constructor.  Apparently required?
-     */
-    public function __construct(){
-
-        if(HelperFunctions::isLoggedIn()) {
-            $_SESSION["auth-current-user"] = Authentication::getCurrentUser();
+    public static function createUser($firstName, $middleName, $lastName, $email, $site, $password, $authType = "REGULAR")
+    {
+        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+            return Registration::registerNewUser($firstName, $middleName, $lastName, $email, $site, $password, $authType);
         }
-
     }
 
-    /**
-     * Creates User
-     */
-    public function createUser($firstName, $middleName, $lastName, $email, $type, $hashedPassword) {
 
-        Registration::addNewUserToDB($firstName, $middleName, $lastName, $email, $type, $hashedPassword);
-    }
-
-    /**
-     * Edits user type.
-     */
-    public function editUserType($email, $authType) {
-
-        Registration::setAuthTypeInDB($email, $authType);
+    public static function editUserType($email, $authType)
+    {
+        $sql = "UPDATE users SET auth_type = " . self::PREPARED_STATEMENT_1 . " WHERE email = " . self::PREPARED_STATEMENT_2;
+        self::getDataWithTwoClauses($sql, $email, $authType);
     }
 
     /**
      * Adds website registration to user
      */
-    public function editUserAddRegistrationTo($userId, $websiteId) {
-
-        $sql = "INSERT INTO user_site_xref (user_id, site_id) VALUES ($userId, $websiteId);";
-        $results = $this->getDataWithTwoClauses($sql, $userId, $websiteId);
+    public static function editUserAddRegistrationTo($userId, $websiteId)
+    {
+        $sql = "INSERT INTO user_site_xref (user_id, site_id) VALUES (" . self::PREPARED_STATEMENT_1 . ", " . self::PREPARED_STATEMENT_2 . ");";
+        $results = self::getDataWithTwoClauses($sql, $userId, $websiteId);
         return $results;
     }
 
@@ -61,10 +47,10 @@ class Administration extends EditCurrentUserInfo {
      * @param $userId
      * @param $websiteId
      */
-    public function editUserRemoveRegistrationFrom($userId, $websiteId) {
-
-        $sql = "DELETE FROM user_site_xref WHERE user_id = $userId AND site_id = $websiteId;";
-        $results = $this->getDataWithTwoClauses($sql, $userId, $websiteId);
+    public static function editUserRemoveRegistrationFrom($userId, $websiteId)
+    {
+        $sql = "DELETE FROM user_site_xref WHERE user_id = " . self::PREPARED_STATEMENT_1 . " AND site_id = " . self::PREPARED_STATEMENT_2;
+        $results = self::getDataWithTwoClauses($sql, $userId, $websiteId);
         return $results;
     }
 
@@ -72,11 +58,11 @@ class Administration extends EditCurrentUserInfo {
      * Select lastname, firstname, middlename, email from user with user_id
      * @param $userId
      */
-    public function getUserWithID($userId) {
-
+    public static function getUserWithID($userId)
+    {
         $sql = "SELECT lastname, firstname, middlename, email  FROM users WHERE " .
-            "user_id = $userId ORDER BY lastname";
-        $results = $this->getDataWithOneClause($sql, $userId);
+            "user_id = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
+        $results = self::getDataWithOneClause($sql, $userId);
         return $results;
     }
 
@@ -84,11 +70,11 @@ class Administration extends EditCurrentUserInfo {
      * Select lastname, firstname, middlename, user_id from user with email
      * @param $userEmail
      */
-    public function getUserWithEmail($userEmail) {
-
+    public static function getUserWithEmail($userEmail)
+    {
         $sql = "SELECT lastname, firstname, middlename, user_id FROM users WHERE " .
-            "email = $userEmail ORDER BY lastname";
-        $results = $this->getDataWithOneClause($sql, $userEmail);
+            "email = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
+        $results = self::getDataWithOneClause($sql, $userEmail);
         return $results;
     }
 
@@ -97,11 +83,11 @@ class Administration extends EditCurrentUserInfo {
      * @param $userFirstName
      * @param $userLastName
      */
-    public function getUsersWithFirstAndLastName($userFirstName, $userLastName) {
-
+    public static function getUsersWithFirstAndLastName($userFirstName, $userLastName)
+    {
         $sql = "SELECT lastname, firstname, middlename, email, user_id FROM users WHERE " .
-            " firstname = $userFirstName AND lastname = $userLastName ORDER BY lastname";
-        $results = $this->getDataWithTwoClauses($sql, $userFirstName, $userLastName);
+            " firstname = " . self::PREPARED_STATEMENT_1 . " AND lastname = " . self::PREPARED_STATEMENT_2 . " ORDER BY lastname";
+        $results = self::getDataWithTwoClauses($sql, $userFirstName, $userLastName);
         return $results;
     }
 
@@ -109,11 +95,11 @@ class Administration extends EditCurrentUserInfo {
      * Select all users in ascending order whose first name starts with passed letter
      * @param $searchLetter
      */
-    public function getUsersByFirstNameStartingWith($searchLetter) {
-
+    public static function getUsersByFirstNameStartingWith($searchLetter)
+    {
         $sql = "SELECT firstname, middlename, lastname, email, user_id FROM users WHERE " .
-            "firstname LIKE " . "$searchLetter" . "% ORDER BY firstname ASC";
-        $results = $this->getDataWithOneClause($sql, $searchLetter);
+            "firstname LIKE " . self::PREPARED_STATEMENT_1 . "% ORDER BY firstname ASC";
+        $results = self::getDataWithOneClause($sql, $searchLetter);
         return $results;
     }
 
@@ -121,11 +107,10 @@ class Administration extends EditCurrentUserInfo {
      * Select all users in ascending order whose last name starts with passed letter
      * @param $searchLetter
      */
-    public function getUsersByLastNameStartingWith($searchLetter) {
-
-        $sql = "SELECT lastname, firstname, middlename, email, user_id FROM users WHERE lastname LIKE " .
-            "$searchLetter" . "% ORDER BY lastname ASC";
-        $results = $this->getDataWithOneClause($sql, $searchLetter);
+    public static function getUsersByLastNameStartingWith($searchLetter)
+    {
+        $sql = "SELECT lastname, firstname, middlename, email, user_id FROM users WHERE lastname LIKE " . self::PREPARED_STATEMENT_1 . "% ORDER BY lastname ASC";
+        $results = self::getDataWithOneClause($sql, $searchLetter);
         return $results;
     }
 
@@ -133,13 +118,12 @@ class Administration extends EditCurrentUserInfo {
      * Select all users who are registered to the passed website name
      * @param $currentWebsite
      */
-    public function getUsersRegisteredToThisSite($currentWebsite) {
-
+    public static function getUsersRegisteredToThisSite($currentWebsite)
+    {
         $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id FROM " .
             "users INNER JOIN users ON users.user_id = user_site_xref.user_id INNER JOIN sites ON " .
-            "sites.site_id = user_site_xref.site_id WHERE site.site_name = $currentWebsite " .
-            "ORDER BY lastname";
-        $results = $this->getDataWithOneClause($sql, $currentWebsite);
+            "sites.site_id = user_site_xref.site_id WHERE site.site_name = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
+        $results = self::getDataWithOneClause($sql, $currentWebsite);
         return $results;
     }
 
@@ -147,23 +131,22 @@ class Administration extends EditCurrentUserInfo {
      * Select all users with passed type.  Unused, field not present in database
      * @param $userType
      */
-    public function getUsersWithType($userType) {
-
+    public static function getUsersWithType($userType)
+    {
         $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id FROM " .
             "users INNER JOIN users ON users.user_id = user_auth_xref.user_id INNER JOIN auth ON " .
-            "auth.auth_type = user_auth_xref.auth_type WHERE auth.auth_type = $userType " .
-            "ORDER BY lastname";
-        $results = $this->getDataWithOneClause($sql, $userType);
+            "auth.auth_type = user_auth_xref.auth_type WHERE auth.auth_type = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
+        $results = self::getDataWithOneClause($sql, $userType);
         return $results;
     }
 
     /**
      * Get a list of all websites and their associated ids
      */
-    public function getWebsites() {
-
+    public static function getWebsites()
+    {
         $sql = "SELECT * FROM sites";
-        $results = $this->getDataWithNoClause($sql);
+        $results = self::getDataWithNoClause($sql);
         return $results;
     }
 
@@ -171,10 +154,10 @@ class Administration extends EditCurrentUserInfo {
      * Deletes user with passed user id
      * @param $userId
      */
-    public function deleteUserById($userId) {
-
-        $sql = "DELETE FROM users WHERE user_id = $userId";
-        $this->getDataWithOneClause($sql, $userId);
+    public static function deleteUserById($userId)
+    {
+        $sql = "DELETE FROM users WHERE user_id = " . self::PREPARED_STATEMENT_1 . "";
+        self::getDataWithOneClause($sql, $userId);
     }
 
     /**
@@ -182,27 +165,31 @@ class Administration extends EditCurrentUserInfo {
      * @param $sql
      * @return $result
      */
-    private function getDataWithNoClause($sql) {
-
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->execute();
-        $result = $statement->fetch();
-        return $result;
+    private static function getDataWithNoClause($sql)
+    {
+        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+            $statement = Database::getDBConnection()->prepare($sql);
+            $statement->execute();
+            $result = $statement->fetch();
+            return $result;
+        }
     }
 
     /**
      * Executes SQL query that has one variable clause
      * @param $sql
-     * @param $whereClause
+     * @param $variableClause
      * @return $result
      */
-    private function getDataWithOneClause($sql, $variableClause) {
-
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam($variableClause, PDO::PARAM_STR);
-        $statement->execute();
-        $result = $statement->fetch();
-        return $result;
+    private static function getDataWithOneClause($sql, $variableClause)
+    {
+        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+            $statement = Database::getDBConnection()->prepare($sql);
+            $statement->bindParam(":prepared_1", $variableClause, PDO::PARAM_STR);
+            $statement->execute();
+            $result = $statement->fetch();
+            return $result;
+        }
     }
 
     /**
@@ -212,13 +199,16 @@ class Administration extends EditCurrentUserInfo {
      * @param $secondVariableClause
      * @return $result
      */
-    private function getDataWithTwoClauses($sql, $firstVariableClause, $secondVariableClause) {
-
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam($firstVariableClause, $secondVariableClause, PDO::PARAM_STR);
-        $statement->execute();
-        $result = $statement->fetch();
-        return $result;
+    private static function getDataWithTwoClauses($sql, $firstVariableClause, $secondVariableClause)
+    {
+        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+            $statement = Database::getDBConnection()->prepare($sql);
+            $statement->bindParam(":prepared_1", $firstVariableClause, PDO::PARAM_STR);
+            $statement->bindParam(":prepared_2", $secondVariableClause, PDO::PARAM_STR);
+            $statement->execute();
+            $result = $statement->fetch();
+            return $result;
+        }
     }
 }
 

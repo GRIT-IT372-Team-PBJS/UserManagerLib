@@ -21,7 +21,7 @@ class User
     private $middleName;
     private $email;
     private $userId;
-    private $type;
+    private $authType;
 
     /**
      * User constructor.
@@ -39,7 +39,7 @@ class User
         $this->middleName = $middleName;
         $this->email = $email;
         $this->userId = $userId;
-        $this->type = $type;
+        $this->authType = $type;
     }
 
     /**
@@ -92,19 +92,25 @@ class User
      * Returns TYPE of user.
      * @return string
      */
-    public function getType()
+    public function getAuthType()
     {
-        return $this->type;
+        return $this->authType;
     }
 
-    /**
-     * checks if name has no numeric or special characters except for -
-     * @param $name
-     * @return bool
-     */
-    public function isValidName($name)
-    {
-        return ctype_alpha(str_replace("-", "", $name));
+    public function getAuthRank() {
+
+        $sql = "SELECT auth_rank FROM auth WHERE auth_type = :auth_type";
+        $statement = Database::getDBConnection()->prepare($sql);
+        $statement->bindParam(":auth_type", $this->authType(), PDO::PARAM_INT);
+        $statement->execute();
+
+        //Uncomment the code below if you want to do error handling on this database call.
+        //print_r($statement->errorInfo());
+
+        $result = $statement->fetch();
+
+        return $result["auth_type"];
+
     }
 
     /**
@@ -113,7 +119,7 @@ class User
      */
     public function __toString()
     {
-        return "<b>CLASS INFO:</b> This is a User class object use the class's getter methods to retrieve data from this object. This class contains these field values: [". $this->firstName . "], [" . $this->getMiddleName() . "], [" . $this->lastName . "], [" . $this->email . "], [" . $this->type . "], [" . $this->userId . "]";
+        return "<b>CLASS INFO:</b> This is a User class object use the class's getter methods to retrieve data from this object. This class contains these field values: [". $this->firstName . "], [" . $this->getMiddleName() . "], [" . $this->lastName . "], [" . $this->email . "], [" . $this->authType . "], [" . $this->userId . "]";
     }
 
 

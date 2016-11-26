@@ -65,6 +65,31 @@ class HelperFunctions
 
     }
 
+    /**
+     * This checks the logged in users rank in terms of integers so that you can scale authentication, Example: if a Admin is rank 1 and a SuperAdmin is rank 0 and a Regular user is rank 10 and you want anyone who is Admin and up to have access you would want something like "If UserRankLevel <= AdminRankLevel then allow access".
+     *
+     * Returns FALSE if user is either not logged in or NOT Authorized.
+     *
+     * Returns TRUE if user is Authorized.
+     *
+     * @param int $rankNeeded This is so you can set the rank needed for access.
+     * @return Boolean
+     */
+    public static function isUserAuthorized($rankNeeded)
+    {
+
+        if (HelperFunctions::isLoggedIn()) {
+
+            $userRank = $_SESSION["auth-current-user"]->getAuthRank();
+
+            //Checks to make sure the user who wants to use this class has the proper authority to use this class.
+            return $userRank <= $rankNeeded && $userRank >= 0;
+
+        } else {
+            return false;
+        }
+    }
+
     public static function isRegisteredToCurrentSite($currentSite, $email)
     {
 
