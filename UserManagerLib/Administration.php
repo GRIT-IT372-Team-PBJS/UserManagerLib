@@ -29,7 +29,7 @@ class Administration
     public static function editUserType($email, $authType)
     {
         $sql = "UPDATE users SET auth_type = " . self::PREPARED_STATEMENT_1 . " WHERE email = " . self::PREPARED_STATEMENT_2;
-        self::getDataWithTwoClauses($sql, $email, $authType);
+        self::runSQLWithTwoClauses($sql, $email, $authType, false);
     }
 
     /**
@@ -38,7 +38,7 @@ class Administration
     public static function editUserAddRegistrationTo($userId, $websiteId)
     {
         $sql = "INSERT INTO user_site_xref (user_id, site_id) VALUES (" . self::PREPARED_STATEMENT_1 . ", " . self::PREPARED_STATEMENT_2 . ");";
-        $results = self::getDataWithTwoClauses($sql, $userId, $websiteId);
+        $results = self::runSQLWithTwoClauses($sql, $userId, $websiteId, true);
         return $results;
     }
 
@@ -50,7 +50,7 @@ class Administration
     public static function editUserRemoveRegistrationFrom($userId, $websiteId)
     {
         $sql = "DELETE FROM user_site_xref WHERE user_id = " . self::PREPARED_STATEMENT_1 . " AND site_id = " . self::PREPARED_STATEMENT_2;
-        $results = self::getDataWithTwoClauses($sql, $userId, $websiteId);
+        $results = self::runSQLWithTwoClauses($sql, $userId, $websiteId, true);
         return $results;
     }
 
@@ -62,7 +62,7 @@ class Administration
     {
         $sql = "SELECT lastname, firstname, middlename, email  FROM users WHERE " .
             "user_id = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
-        $results = self::getDataWithOneClause($sql, $userId);
+        $results = self::runSQLWithOneClause($sql, $userId, true);
         return $results;
     }
 
@@ -74,7 +74,7 @@ class Administration
     {
         $sql = "SELECT lastname, firstname, middlename, user_id FROM users WHERE " .
             "email = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
-        $results = self::getDataWithOneClause($sql, $userEmail);
+        $results = self::runSQLWithOneClause($sql, $userEmail, true);
         return $results;
     }
 
@@ -87,7 +87,7 @@ class Administration
     {
         $sql = "SELECT lastname, firstname, middlename, email, user_id FROM users WHERE " .
             " firstname = " . self::PREPARED_STATEMENT_1 . " AND lastname = " . self::PREPARED_STATEMENT_2 . " ORDER BY lastname";
-        $results = self::getDataWithTwoClauses($sql, $userFirstName, $userLastName);
+        $results = self::runSQLWithTwoClauses($sql, $userFirstName, $userLastName, true);
         return $results;
     }
 
@@ -99,7 +99,7 @@ class Administration
     {
         $sql = "SELECT firstname, middlename, lastname, email, user_id FROM users WHERE " .
             "firstname LIKE " . self::PREPARED_STATEMENT_1 . "% ORDER BY firstname ASC";
-        $results = self::getDataWithOneClause($sql, $searchLetter);
+        $results = self::runSQLWithOneClause($sql, $searchLetter, true);
         return $results;
     }
 
@@ -110,7 +110,7 @@ class Administration
     public static function getUsersByLastNameStartingWith($searchLetter)
     {
         $sql = "SELECT lastname, firstname, middlename, email, user_id FROM users WHERE lastname LIKE " . self::PREPARED_STATEMENT_1 . "% ORDER BY lastname ASC";
-        $results = self::getDataWithOneClause($sql, $searchLetter);
+        $results = self::runSQLWithOneClause($sql, $searchLetter, true);
         return $results;
     }
 
@@ -123,7 +123,7 @@ class Administration
         $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id FROM " .
             "users INNER JOIN users ON users.user_id = user_site_xref.user_id INNER JOIN sites ON " .
             "sites.site_id = user_site_xref.site_id WHERE site.site_name = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
-        $results = self::getDataWithOneClause($sql, $currentWebsite);
+        $results = self::runSQLWithOneClause($sql, $currentWebsite, true);
         return $results;
     }
 
@@ -136,7 +136,7 @@ class Administration
         $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id FROM " .
             "users INNER JOIN users ON users.user_id = user_auth_xref.user_id INNER JOIN auth ON " .
             "auth.auth_type = user_auth_xref.auth_type WHERE auth.auth_type = " . self::PREPARED_STATEMENT_1 . " ORDER BY lastname";
-        $results = self::getDataWithOneClause($sql, $userType);
+        $results = self::runSQLWithOneClause($sql, $userType, true);
         return $results;
     }
 
@@ -146,7 +146,7 @@ class Administration
     public static function getWebsites()
     {
         $sql = "SELECT * FROM sites";
-        $results = self::getDataWithNoClause($sql);
+        $results = self::runSQLWithNoClause($sql, true);
         return $results;
     }
 
@@ -157,7 +157,44 @@ class Administration
     public static function deleteUserById($userId)
     {
         $sql = "DELETE FROM users WHERE user_id = " . self::PREPARED_STATEMENT_1 . "";
-        self::getDataWithOneClause($sql, $userId);
+        self::runSQLWithOneClause($sql, $userId, false);
+    }
+
+
+    public static function addNewAuthType($newAuthType, $rankAssociated)
+    {
+        $isAuthTypeUnique = !HelperFunctions::isValidType($newAuthType);
+        $isCharsAllUpperCase =  ctype_upper($newAuthType);
+        $isRankAnInt = ctype_digit($rankAssociated);
+
+        if($isAuthTypeUnique && $isCharsAllUpperCase && $isRankAnInt && HelperFunctions::isUserAuthorized(0)) {
+
+            $sql = "INSERT INTO auth (auth_type, auth_rank) values( " . self::PREPARED_STATEMENT_1 . ", " . self::PREPARED_STATEMENT_2 . ");";
+            self::runSQLWithTwoClauses($sql, $newAuthType, $rankAssociated, false);
+        }
+
+    }
+
+    public static function deleteAuthType($authType){
+        if (HelperFunctions::isUserAuthorized(0)) {
+            if($authType != "SUPER_ADMIN" || $authType != "ADMIN") {
+
+                $sql = "DELETE FROM auth_user_xref WHERE auth_type = " . self::PREPARED_STATEMENT_1;
+                self::runSQLWithOneClause($sql, $authType, false);
+
+                $sql = "DELETE FROM auth WHERE auth_type = " . self::PREPARED_STATEMENT_1;
+                self::runSQLWithOneClause($sql, $authType, false);
+            }
+        }
+    }
+
+    public static function deleteSite($siteName) {
+
+        $sql = "DELETE FROM user_site_xref WHERE site_name = " . self::PREPARED_STATEMENT_1;
+        self::runSQLWithOneClause($sql, $siteName, false);
+
+        $sql = "DELETE FROM sites WHERE site_name = " . self::PREPARED_STATEMENT_1;
+        self::runSQLWithOneClause($sql, $siteName, false);
     }
 
     /**
@@ -165,13 +202,17 @@ class Administration
      * @param $sql
      * @return $result
      */
-    private static function getDataWithNoClause($sql)
+    private static function runSQLWithNoClause($sql, $expectsReturnedData)
     {
         if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->execute();
-            $result = $statement->fetch();
-            return $result;
+
+            if ($expectsReturnedData) {
+                $result = $statement->fetch();
+                return $result;
+            }
+
         }
     }
 
@@ -181,14 +222,17 @@ class Administration
      * @param $variableClause
      * @return $result
      */
-    private static function getDataWithOneClause($sql, $variableClause)
+    private static function runSQLWithOneClause($sql, $variableClause, $expectsReturnedData)
     {
         if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $variableClause, PDO::PARAM_STR);
             $statement->execute();
-            $result = $statement->fetch();
-            return $result;
+
+            if ($expectsReturnedData){
+                $result = $statement->fetch();
+                return $result;
+            }
         }
     }
 
@@ -199,16 +243,20 @@ class Administration
      * @param $secondVariableClause
      * @return $result
      */
-    private static function getDataWithTwoClauses($sql, $firstVariableClause, $secondVariableClause)
+    private static function runSQLWithTwoClauses($sql, $firstVariableClause, $secondVariableClause, $expectsReturnedData)
     {
         if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $firstVariableClause, PDO::PARAM_STR);
             $statement->bindParam(":prepared_2", $secondVariableClause, PDO::PARAM_STR);
             $statement->execute();
-            $result = $statement->fetch();
-            return $result;
+
+            if ($expectsReturnedData){
+                $result = $statement->fetch();
+                return $result;
+            }
         }
     }
+
 }
 
