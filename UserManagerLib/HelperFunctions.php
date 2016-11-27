@@ -8,14 +8,14 @@
  */
 
 require_once "Database.php";
-
+require_once "RunsSQL.php";
 /**
  * Class HelperFunctions
  *
  * This class is used to give database utility to other developers using this library.
  *
  */
-class HelperFunctions
+class HelperFunctions extends RunsSQL
 {
     /**
      * Gets the site id associated with the site name passed in.
@@ -27,17 +27,16 @@ class HelperFunctions
      */
     public static function getSiteId($siteName){
 
-        $sql = "SELECT site_id FROM sites WHERE site_name = :site_name";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":site_name", $siteName, PDO::PARAM_INT);
-        $statement->execute();
+        $sql = "SELECT site_id FROM sites WHERE site_name = " . parent::PREPARED_STATEMENT_1;
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
+        $result = parent::runSQLWithOneClause($sql, $siteName, true);
 
-        $result = $statement->fetch();
+        if ($result != false) {
+            return $result["site_id"];
+        } else {
+            return false;
+        }
 
-        return $result["site_id"];
 
     }
 
@@ -51,17 +50,15 @@ class HelperFunctions
      */
     public static function getUserId($email){
 
-        $sql = "SELECT user_id FROM users WHERE email = :email";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":email", $email, PDO::PARAM_INT);
-        $statement->execute();
+        $sql = "SELECT user_id FROM users WHERE email = " . parent::PREPARED_STATEMENT_1;
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
+        $result = parent::runSQLWithOneClause($sql, $email, true);
 
-        $result = $statement->fetch();
-
-        return $result["user_id"];
+        if ($result != false) {
+            return $result["user_id"];
+        } else {
+            return false;
+        }
 
     }
 
@@ -78,7 +75,7 @@ class HelperFunctions
     public static function isUserAuthorized($rankNeeded)
     {
 
-        if (HelperFunctions::isLoggedIn()) {
+        if (self::isLoggedIn()) {
 
             $userRank = $_SESSION["auth-current-user"]->getAuthRank();
 
@@ -90,24 +87,26 @@ class HelperFunctions
         }
     }
 
+    public static function isAuthRankValueAlreadyInUse($rank) {
+        if (self::isLoggedIn() && ctype_digit($rank)){
+            $sql = "SELECT auth_type FROM auth WHERE auth_rank = " . parent::PREPARED_STATEMENT_1;
+            return parent::runSQLGetRowCountForOneClause($sql, $rank) != false && parent::runSQLGetRowCountForOneClause($sql, $rank) > 0;
+        } else {
+            return false;
+        }
+    }
+
     public static function isRegisteredToCurrentSite($currentSite, $email)
     {
 
         $siteId = self::getSiteId($currentSite);
         $userId = self::getUserId($email);
 
-        $sql = "SELECT count(*) FROM user_site_xref WHERE site_id = :site_id AND user_id = :user_id";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":site_id", $siteId, PDO::PARAM_INT);
-        $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
-        $statement->execute();
+        $sql = "SELECT count(*) FROM user_site_xref WHERE site_id = " . parent::PREPARED_STATEMENT_1 . " AND user_id = " . parent::PREPARED_STATEMENT_2;
 
-        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+        $isValidQuery = parent::runSQLGetRowCountForTwoClause($sql, $siteId, $userId);
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
-
-        if($statement->fetchColumn() > 0 && $isThereNoDatabaseErrors) {
+        if( $isValidQuery != false && $isValidQuery > 0) {
 
             return true;
 
@@ -119,24 +118,11 @@ class HelperFunctions
 
     public static function isUserInDB($email)
     {
-        $sql = "SELECT count(*) From users WHERE email = :email";
+        $sql = "SELECT count(*) From users WHERE email = " . parent::PREPARED_STATEMENT_1;
 
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":email", $email, PDO::PARAM_STR);
-        $statement->execute();
+        $isValidQuery = parent::runSQLGetRowCountForOneClause($sql, $email);
 
-        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
-
-        $rowCount = $statement->fetchColumn();
-
-        if ($rowCount > 0 && $isThereNoDatabaseErrors){
-            return true;
-        } else {
-            return false;
-        }
+        return $isValidQuery != false && $isValidQuery > 0;
     }
 
     public static function isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $type, $password)
@@ -144,7 +130,7 @@ class HelperFunctions
 
         //if all user data is valid return true.
         $isAllDataValid = self::isValidName($firstName, 2) && self::isValidMiddleName($middleName) && self::isValidName($lastName, 2) &&
-            self::isValidEmail($email) && self::isValidSite($currentSite) && self::isValidType($type) && self::isPasswordValid($password);
+            self::isValidEmail($email) && self::isValidSite($currentSite) && self::isValidAuthType($type) && self::isPasswordValid($password);
 
         return $isAllDataValid;
     }
@@ -176,38 +162,21 @@ class HelperFunctions
 
     public static function isValidSite($currentSite)
     {
-        $sql = "SELECT count(*) FROM sites WHERE site_name = :site_name";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":site_name", $currentSite, PDO::PARAM_STR);
-        $statement->execute();
+        $sql = "SELECT count(*) FROM sites WHERE site_name = " . parent::PREPARED_STATEMENT_1;
 
-        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+        $isValidQuery = parent::runSQLGetRowCountForOneClause($sql, $currentSite);
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
-
-        $isValidSite = $statement->fetchColumn() > 0;
-
-
-        return $isValidSite && $isThereNoDatabaseErrors;
+        return $isValidQuery != false && $isValidQuery > 0;
     }
 
-    public static function isValidType($type)
+    public static function isValidAuthType($type)
     {
 
-        $sql = "SELECT count(*) FROM auth WHERE auth_type = :auth_type";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":auth_type", $type, PDO::PARAM_STR);
-        $statement->execute();
+        $sql = "SELECT count(*) FROM auth WHERE auth_type = " . parent::PREPARED_STATEMENT_1;
 
-        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+        $isValidQuery = parent::runSQLGetRowCountForOneClause($sql, $type);
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
-
-        $isValidType = $statement->fetchColumn() > 0;
-
-        return $isValidType && $isThereNoDatabaseErrors;
+        return $isValidQuery != false && $isValidQuery > 0;
 
     }
 

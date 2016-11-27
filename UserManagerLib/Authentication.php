@@ -10,6 +10,7 @@
 require_once "Database.php";
 require_once "User.php";
 require_once "HelperFunctions.php";
+require_once "RunsSQL.php";
 
 /**
  * Class Authentication
@@ -21,9 +22,8 @@ require_once "HelperFunctions.php";
  *
  * @author Peter L. Kim <peterlk.dev@gmail.com>
  */
-class Authentication
+class Authentication extends RunsSQL
 {
-
     /**
      * Logs user in by checking if data is valid and if user exists. Sets user object into a session if login was successful.
      *
@@ -73,7 +73,7 @@ class Authentication
 
                             $requiredAuthType = func_get_arg(3);
 
-                            if ($usersAuthType == $requiredAuthType && HelperFunctions::isValidType($usersAuthType)) {
+                            if ($usersAuthType == $requiredAuthType && HelperFunctions::isValidAuthType($usersAuthType)) {
 
                                 self::setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $usersAuthType);
                                 Database::closeDBConnection();
@@ -103,20 +103,9 @@ class Authentication
     //the database it returns the database results else returns a false boolean.
     private static function fetchUserDataFromDB($email)
     {
-            $sql = "SELECT * FROM users WHERE email = :email";
-            $statement = Database::getDBConnection()->prepare($sql);
-            $statement->bindParam(":email", $email, PDO::PARAM_STR);
-            $statement->execute();
+            $sql = "SELECT * FROM users WHERE email = " . parent::PREPARED_STATEMENT_1;
 
-            $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
-            //Uncomment the code below if you want to do error handling on this database call.
-            //print_r($statement->errorInfo());
-
-            //if the DB query doesn't fail return results else return boolean value of false.
-            $result = $isThereNoDatabaseErrors ? $statement->fetch() : false;
-
-            return $result;
+            return parent::runSQLWithOneClause($sql, $email, true);
     }
 
    //sets the current session, the session contains a user object.
@@ -162,17 +151,11 @@ class Authentication
 
             $userId = $_SESSION["auth-current-user"]->getUserId();
 
-            $sql = "SELECT count(*) FROM users WHERE user_id = :user_id";
-            $statement = Database::getDBConnection()->prepare($sql);
-            $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
-            $statement->execute();
+            $sql = "SELECT count(*) FROM users WHERE user_id = " . parent::PREPARED_STATEMENT_1;
 
-            //Uncomment the code below if you want to do error handling on this database call.
-            //print_r($statement->errorInfo());
+            $row = parent::runSQLGetRowCountForOneClause($sql, $userId);
 
-            $row = $statement->fetchColumn();
-
-            if ($row < 1){
+            if ($row == false && $row < 1){
                 header("Location: " . $url);
             }
 
@@ -182,7 +165,7 @@ class Authentication
 
                 $requiredAuthType = func_get_args(1);
 
-                if(HelperFunctions::isValidType($requiredAuthType)){
+                if(HelperFunctions::isValidAuthType($requiredAuthType)){
 
                     if ($_SESSION["auth-current-user"]->getType() != $requiredAuthType){
                         header("Location: " . $url);
@@ -245,18 +228,9 @@ class Authentication
             $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $userId = $_SESSION["auth-current-user"]->getUserId();
 
-            $sql = "UPDATE users SET password = :password WHERE user_id = :user_id";
-            $statement = Database::getDBConnection()->prepare($sql);
-            $statement->bindParam(":password", $newPassword, PDO::PARAM_STR);
-            $statement->bindParam(":user_id", $userId, PDO::PARAM_STR);
-            $statement->execute();
+            $sql = "UPDATE users SET password = " . parent::PREPARED_STATEMENT_1 . " WHERE user_id = " . parent::PREPARED_STATEMENT_2;
 
-            $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
-            //Uncomment the code below if you want to do error handling on this database call.
-            //print_r($statement->errorInfo());
-
-            return $isThereNoDatabaseErrors;
+            return parent::runSQLWithTwoClauses($sql, $newPassword, $userId, false);
     }
 
     //destroys all sessions
@@ -303,14 +277,9 @@ class Authentication
 
         $generatedPass = password_hash($generatedPass, PASSWORD_DEFAULT);
 
-        $sql = "UPDATE users SET password = :password WHERE email = :email";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":password", $generatedPass, PDO::PARAM_STR);
-        $statement->bindParam(":email", $email, PDO::PARAM_STR);
-        $statement->execute();
+        $sql = "UPDATE users SET password = " . parent::PREPARED_STATEMENT_1 . " WHERE email = " . parent::PREPARED_STATEMENT_2;
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
+        return self::runSQLWithTwoClauses($sql, $generatedPass, $email, false);
     }
 
     //Generates a random password of length 10.

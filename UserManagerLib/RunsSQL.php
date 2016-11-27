@@ -18,7 +18,7 @@ require_once "HelperFunctions.php";
  * @author Peter L. Kim <peterlk.dev@gmail.com>
  * @author Benjamin Arnold <benji.arnold@gmail.com>
  */
-class Queryable
+class RunsSQL
 {
     //setting up prepared statement placeholders to make my sql quires dynamic.
     const PREPARED_STATEMENT_1 = ":prepared_1";
@@ -36,7 +36,7 @@ class Queryable
      */
     protected static function runSQLWithNoClause($sql, $isReturnExpected)
     {
-        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+        if (HelperFunctions::isLoggedIn()) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->execute();
 
@@ -55,7 +55,7 @@ class Queryable
      */
     protected static function runSQLWithOneClause($sql, $variableClause, $isReturnExpected)
     {
-        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+        if (HelperFunctions::isLoggedIn()) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $variableClause, PDO::PARAM_STR);
             $statement->execute();
@@ -75,7 +75,7 @@ class Queryable
      */
     protected static function runSQLWithTwoClauses($sql, $firstVariableClause, $secondVariableClause, $isReturnExpected)
     {
-        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+        if (HelperFunctions::isLoggedIn()) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $firstVariableClause, PDO::PARAM_STR);
             $statement->bindParam(":prepared_2", $secondVariableClause, PDO::PARAM_STR);
@@ -89,7 +89,7 @@ class Queryable
 
     protected static function runSQLWithThreeClauses($sql, $firstVarClause, $secondVarClause, $thirdVarClause, $isReturnExpected)
     {
-        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+        if (HelperFunctions::isLoggedIn()) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $firstVarClause, PDO::PARAM_STR);
             $statement->bindParam(":prepared_2", $secondVarClause, PDO::PARAM_STR);
@@ -106,7 +106,7 @@ class Queryable
 
     protected static function runSQLWithFourClauses($sql, $firstVarClause, $secondVarClause, $thirdVarClause, $fourthVarClause, $isReturnExpected)
     {
-        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+        if (HelperFunctions::isLoggedIn()) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $firstVarClause, PDO::PARAM_STR);
             $statement->bindParam(":prepared_2", $secondVarClause, PDO::PARAM_STR);
@@ -124,7 +124,7 @@ class Queryable
 
     protected static function runSQLWithFiveClauses($sql, $firstVarClause, $secondVarClause, $thirdVarClause, $fourthVarClause, $fifthVarClause, $isReturnExpected)
     {
-        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+        if (HelperFunctions::isLoggedIn()) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $firstVarClause, PDO::PARAM_STR);
             $statement->bindParam(":prepared_2", $secondVarClause, PDO::PARAM_STR);
@@ -144,7 +144,7 @@ class Queryable
 
     protected static function runSQLWithSixClauses($sql, $firstVarClause, $secondVarClause, $thirdVarClause, $fourthVarClause, $fifthVarClause, $sixthVarClause, $isReturnExpected)
     {
-        if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
+        if (HelperFunctions::isLoggedIn()) {
             $statement = Database::getDBConnection()->prepare($sql);
             $statement->bindParam(":prepared_1", $firstVarClause, PDO::PARAM_STR);
             $statement->bindParam(":prepared_2", $secondVarClause, PDO::PARAM_STR);
@@ -162,10 +162,45 @@ class Queryable
         }
     }
 
-    private static function queryResultAndOrCheckList($isThereNoDatabaseErrors, $isReturnExpected, $statement){
+    protected static function runSQLGetRowCountForOneClause($sql, $firstVarClause)
+    {
+        if (HelperFunctions::isLoggedIn()) {
+            $statement = Database::getDBConnection()->prepare($sql);
+            $statement->bindParam(":prepared_1", $firstVarClause, PDO::PARAM_STR);
+            $statement->execute();
 
-        if ($isThereNoDatabaseErrors){
-            if($isReturnExpected) {
+            $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
+            if ($isThereNoDatabaseErrors) {
+                return $statement->fetchColumn();
+            } else {
+                return false;
+            }
+        }
+    }
+
+    protected static function runSQLGetRowCountForTwoClause($sql, $firstVarClause, $secondVarClause)
+    {
+        if (HelperFunctions::isLoggedIn()) {
+            $statement = Database::getDBConnection()->prepare($sql);
+            $statement->bindParam(":prepared_1", $firstVarClause, PDO::PARAM_STR);
+            $statement->bindParam(":prepared_2", $secondVarClause, PDO::PARAM_STR);
+            $statement->execute();
+
+            $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
+
+            if ($isThereNoDatabaseErrors) {
+                return $statement->fetchColumn();
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private static function queryResultAndOrCheckList($isThereNoDatabaseErrors, $isReturnExpected, $statement)
+    {
+        if ($isThereNoDatabaseErrors) {
+            if ($isReturnExpected) {
                 $result = $statement->fetch();
                 return $result;
             } else {
@@ -174,6 +209,7 @@ class Queryable
         } else {
             return false;
         }
-
     }
+
+
 }

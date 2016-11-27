@@ -10,6 +10,7 @@
 require_once "User.php";
 require_once "Database.php";
 require_once "HelperFunctions.php";
+require_once "RunsSQL.php";
 
 /**
  * Class Registration
@@ -19,7 +20,7 @@ require_once "HelperFunctions.php";
  * @author Peter L. Kim <peterlk.dev@gmail.com>
  *
  */
-class Registration
+class Registration extends RunsSQL
 {
     /**
      * Registers new users to the database if they don't exist in the database. You can check this by using the methods in the HelperFunctions class. If user already exists in the database then use the registerExistingUsers method in this class.
@@ -62,23 +63,9 @@ class Registration
     private static function addNewUserToDB($firstName, $middleName, $lastName, $email, $type, $hashedPassword){
 
         $sql = "INSERT INTO users (firstname, lastname, middlename, email, auth_type, password)
-                VALUES(:firstname, :lastname, :middlename, :email, :auth_type, :password)";
+                VALUES( " . parent::PREPARED_STATEMENT_1 . ",  " . parent::PREPARED_STATEMENT_2 . ", " . parent::PREPARED_STATEMENT_3 . ", " . parent::PREPARED_STATEMENT_4 . ", " . parent::PREPARED_STATEMENT_5 . ", " . parent::PREPARED_STATEMENT_6 . ")";
 
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":firstname", $firstName, PDO::PARAM_STR);
-        $statement->bindParam(":lastname", $lastName, PDO::PARAM_STR);
-        $statement->bindParam(":middlename", $middleName, PDO::PARAM_STR);
-        $statement->bindParam(":email", $email, PDO::PARAM_STR);
-        $statement->bindParam(":auth_type", $type, PDO::PARAM_STR);
-        $statement->bindParam(":password", $hashedPassword, PDO::PARAM_STR);
-        $statement->execute();
-
-        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
-
-        return $isThereNoDatabaseErrors;
+        return parent::runSQLWithSixClauses($sql, $firstName, $lastName, $middleName, $email, $type, $hashedPassword, $type);
 
     }
 
@@ -106,20 +93,13 @@ class Registration
                 if(password_verify($userPasswordInDB, $password)) {
 
                     $sql = "INSERT INTO user_site_xref (user_id, site_id)
-                            VALUES(:user_id, :site_id)";
+                            VALUES(" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . ")";
 
                     $userId = HelperFunctions::getUserId($email);
                     $siteId = HelperFunctions::getSiteId($currentSite);
 
-                    $statement = Database::getDBConnection()->prepare($sql);
-                    $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
-                    $statement->bindParam(":site_id", $siteId, PDO::PARAM_INT);
-                    $statement->execute();
-
-                    $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
-                    //Uncomment the code below if you want to do error handling on this database call.
-                    //print_r($statement->errorInfo());
+                    //sql will return false if it failed.
+                    $isThereNoDatabaseErrors = parent::runSQLWithTwoClauses($sql, $userId, $siteId, false);
 
                     return true && $isThereNoDatabaseErrors;
 
@@ -136,51 +116,30 @@ class Registration
 
                 return false;
             }
-
-        }
+    }
 
 
     //sets the authtype for the user and returns true if there was no database errors.
     private static function setAuthTypeInDB($email, $authType){
 
         $sql = "INSERT INTO user_auth_xref (user_id, auth_type)
-                VALUES(:user_id, :auth_type)";
+                VALUES(" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . "";
 
         $userId = HelperFunctions::getUserId($email);
 
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":user_id", $userId, PDO::PARAM_INT);
-        $statement->bindParam(":auth_type", $authType, PDO::PARAM_STR);
-        $statement->execute();
-
-        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
+        //sql will return false if it failed
+        $isThereNoDatabaseErrors = parent::runSQLWithTwoClauses($sql, $userId, $authType, false);
 
         return $isThereNoDatabaseErrors;
-
     }
 
     //gets password associated with the email in the database. If the email is valid in
     //the database it returns the database results else returns a false boolean.
     private static function fetchUserPasswordFromDB($email)
     {
-        $sql = "SELECT password FROM users WHERE email = :email";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":email", $email, PDO::PARAM_STR);
-        $statement->execute();
+        $sql = "SELECT password FROM users WHERE email = " . parent::PREPARED_STATEMENT_1;
 
-        $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
-
-        $result = $isThereNoDatabaseErrors ? $statement->fetch()["password"] : false;
-
-        return $result;
+        //sql will return false if it failed
+        return parent::runSQLWithOneClause($sql, $email, true);
     }
-
-
-
 }

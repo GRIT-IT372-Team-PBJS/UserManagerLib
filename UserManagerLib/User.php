@@ -6,7 +6,7 @@
  * Date: 11/1/2016
  * Time: 3:21 PM
  */
-
+require_once "RunsSQL.php";
 /**
  * Class User
  *
@@ -14,7 +14,7 @@
  *
  * @author Peter L. Kim <peterlk.dev@gmail.com>
  */
-class User
+class User extends RunsSQL
 {
     private $firstName;
     private $lastName;
@@ -99,18 +99,15 @@ class User
 
     public function getAuthRank() {
 
-        $sql = "SELECT auth_rank FROM auth WHERE auth_type = :auth_type";
-        $statement = Database::getDBConnection()->prepare($sql);
-        $statement->bindParam(":auth_type", $this->authType(), PDO::PARAM_INT);
-        $statement->execute();
+        $sql = "SELECT auth_rank FROM auth WHERE auth_type = " . parent::PREPARED_STATEMENT_1;
 
-        //Uncomment the code below if you want to do error handling on this database call.
-        //print_r($statement->errorInfo());
+        $result = parent::runSQLWithOneClause($sql, $this->authType, true);
 
-        $result = $statement->fetch();
-
-        return $result["auth_type"];
-
+        if ($result != false) {
+            return $result["auth_type"];
+        } else {
+            return false;
+        }
     }
 
     /**

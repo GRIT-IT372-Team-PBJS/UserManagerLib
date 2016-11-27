@@ -3,68 +3,69 @@
 require_once "Database.php";
 require_once "User.php";
 require_once "HelperFunctions.php";
+require_once "RunsSQL.php";
 
-class CurrentUser{
+class CurrentUser extends RunsSQL
+{
 
-  /**
-   * This class edits the first name field in the database.
-   * Returns True if the method was successful.
-   * Returns False if the method was unsuccessful.
-   * @param $newFirstName : String input
-   * @return Boolean
-   */
-public static function editFirstName($newFirstName){
+    /**
+     * This class edits the first name field in the database.
+     * Returns True if the method was successful.
+     * Returns False if the method was unsuccessful.
+     * @param $newFirstName : String input
+     * @return Boolean
+     */
+    public static function editFirstName($newFirstName)
+    {
 
-  if(HelperFunctions::isValidName($newFirstName, 2)){
-    $sql = "UPDATE users SET firstname = :firstname WHERE user_id = :user_id";
-    $fieldToBeUpdated = ":email";
-    self::updateUserData($sql, $fieldToBeUpdated, $$newFirstName);
+        if (HelperFunctions::isLoggedIn() && HelperFunctions::isValidName($newFirstName, 2)) {
+            $sql = "UPDATE users SET firstname = " . parent::PREPARED_STATEMENT_1 . " WHERE user_id = " . parent::PREPARED_STATEMENT_2;
 
-    return true;
-  }else {
-    return false;
-  }
-}
+            return parent::runSQLWithTwoClauses($sql, $newFirstName,  $_SESSION["auth-current-user"]->getUserId(), false);
 
-  /**
-   * This method edits the last name field in the database.
-   * Returns True if the method was successful.
-   * Returns False if the method was unsuccessful.
-   * @param $newLastName : String input
-   * @return Boolean
-   */
-public static function editLastName($newLastName){
+        } else {
+            return false;
+        }
+    }
 
-  if(HelperFunctions::isValidName($newLastName, 2)){
-    $sql = "UPDATE users SET lastname = :lastname WHERE user_id = :user_id";
-    $fieldToBeUpdated = ":lastname";
-    self::updateUserData($sql, $fieldToBeUpdated, $newLastName);
+    /**
+     * This method edits the last name field in the database.
+     * Returns True if the method was successful.
+     * Returns False if the method was unsuccessful.
+     * @param $newLastName : String input
+     * @return Boolean
+     */
+    public static function editLastName($newLastName)
+    {
 
-    return true;
-  }else {
-    return false;
-  }
-}
+        if (HelperFunctions::isValidName($newLastName, 2)) {
+            $sql = "UPDATE users SET lastname = " . parent::PREPARED_STATEMENT_1 . " WHERE user_id = " . parent::PREPARED_STATEMENT_2;
 
-  /**
-   * This method edits the middle name field in the db.
-   * Returns True if the method was successful.
-   * Returns False if the method was unsuccessful.
-   * @param $newMiddleName : String
-   * @return Boolean
-   */
-public static function editMiddleName($newMiddleName){
+            return parent::updateUserData($sql, $newLastName, $_SESSION["auth-current-user"]->getUserId(), false);
 
-  if(HelperFunctions::isValidMiddleName($newMiddleName)){
-    $sql = "UPDATE users SET middlename = :middlename WHERE user_id = :user_id";
-    $fieldToBeUpdated = ":middlename";
-    self::updateUserData($sql, $fieldToBeUpdated, $newMiddleName);
+        } else {
+            return false;
+        }
+    }
 
-    return true;
-  }else {
-    return false;
-  }
-}
+    /**
+     * This method edits the middle name field in the db.
+     * Returns True if the method was successful.
+     * Returns False if the method was unsuccessful.
+     * @param $newMiddleName : String
+     * @return Boolean
+     */
+    public static function editMiddleName($newMiddleName)
+    {
+
+        if (HelperFunctions::isValidMiddleName($newMiddleName)) {
+            $sql = "UPDATE users SET middlename = " . parent::PREPARED_STATEMENT_1 . " WHERE user_id = " . parent::PREPARED_STATEMENT_2;
+
+            return parent::runSQLWithTwoClauses($sql, $newMiddleName, $_SESSION["auth-current-user"]->getUserId(), false);
+        } else {
+            return false;
+        }
+    }
 
     /**
      * This method edits the email field in the database.
@@ -73,31 +74,18 @@ public static function editMiddleName($newMiddleName){
      * @param $newEmail : String
      * @return Boolean
      */
-public static function editEmail($newEmail){
+    public static function editEmail($newEmail)
+    {
 
-  if(HelperFunctions::isValidEmail($newEmail)){
-    $sql = "UPDATE users SET email = :email WHERE user_id = :user_id";
-    $fieldToBeUpdated = ":email";
-    self::updateUserData($sql, $fieldToBeUpdated, $newEmail);
+        if (HelperFunctions::isValidEmail($newEmail)) {
+            $sql = "UPDATE users SET email = " . parent::PREPARED_STATEMENT_1 . " WHERE user_id = " . parent::PREPARED_STATEMENT_2;
 
-    return true;
-  }else {
-    return false;
-  }
-}
-
-private static function updateUserData($sql, $fieldToBeUpdated, $valueOfField) {
-
-  if (HelperFunctions::isLoggedIn()) {
-    $statement = Database::getDBConnection()->prepare($sql);
-    $statement->bindParam($fieldToBeUpdated, $valueOfField, PDO::PARAM_STR);
-    $statement->bindParam(":user_id", $_SESSION["auth-current-user"]->getUserId, PDO::PARAM_INT);
-    $statement->execute();
-
-    //Uncomment the code below if you want to do error handling on this database call.
-    //print_r($statement->errorInfo());
-  }
-}
+            return parent::runSQLWithTwoClauses($sql, $newEmail, $_SESSION["auth-current-user"]->getUserId(), false);
+        } else {
+            return false;
+        }
+    }
 
 }
+
 ?>
