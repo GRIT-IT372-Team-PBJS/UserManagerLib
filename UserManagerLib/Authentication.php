@@ -103,6 +103,7 @@ class Authentication extends RunsSQL
     //the database it returns the database results else returns a false boolean.
     private static function fetchUserDataFromDB($email)
     {
+
             $sql = "SELECT * FROM users WHERE email = " . parent::PREPARED_STATEMENT_1;
 
             return parent::runSQLWithOneClause($sql, $email, true);
