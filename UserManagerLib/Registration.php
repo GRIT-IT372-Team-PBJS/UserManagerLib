@@ -47,7 +47,7 @@ class Registration extends RunsSQL
 
                 //checks if none of the DB queries failed while running the sql. If any of them failed return false.
                 if( self::addNewUserToDB($firstName, $middleName, $lastName, $email, $authType, $hashedPassword) &&
-                    self::registerExistingUser($email, $currentSite) &&
+                    self::registerExistingUser($email, $currentSite, $password) &&
                     self::setAuthTypeInDB($email, $authType)){
 
                     return true;

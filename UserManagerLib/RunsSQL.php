@@ -154,7 +154,7 @@ class RunsSQL
         $statement->execute();
 
         $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-
+        echo $statement->errorInfo()[2];
         if ($isThereNoDatabaseErrors) {
             if ($isReturnExpected) {
                 $result = $statement->fetch();

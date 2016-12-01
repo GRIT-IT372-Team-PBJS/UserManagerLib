@@ -42,6 +42,7 @@ class Authentication extends RunsSQL
 
         if (!HelperFunctions::isLoggedIn()) {
 
+
             $result = self::fetchUserDataFromDB($email);
 
             //checks if the DB query didn't fail while running the sql.
@@ -55,7 +56,7 @@ class Authentication extends RunsSQL
                 $hashedPassword = isset($result["password"]) ? $result["password"] : "";
 
                 if (HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
-
+                    echo "DONE";
                     if (password_verify($password, $hashedPassword)) {
 
                         $isAuthParamPassedIn = func_num_args() > 3;

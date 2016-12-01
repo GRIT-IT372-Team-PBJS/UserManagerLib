@@ -20,7 +20,7 @@ session_start();
         $entry7 = isset($_POST["entry7"]) ? $_POST["entry7"] : "";
 
         //Store your test methods below these comments and pass the entries into the parameters to start tests.
-
+        Registration::registerNewUser($entry1,$entry2,$entry3,$entry4,$entry5,$entry6,$entry7);
 
     }
 
