@@ -102,7 +102,7 @@ class HelperFunctions extends RunsSQL
         $siteId = self::getSiteId($currentSite);
         $userId = self::getUserId($email);
 
-        $sql = "SELECT count(*) FROM user_site_xref WHERE site_id = " . parent::PREPARED_STATEMENT_1 . " AND user_id = " . parent::PREPARED_STATEMENT_2;
+        $sql = "SELECT count(*) FROM user_site_auth WHERE site_id = " . parent::PREPARED_STATEMENT_1 . " AND user_id = " . parent::PREPARED_STATEMENT_2;
 
         $isValidQuery = parent::runSQLGetRowCountForTwoClause($sql, $siteId, $userId);
 

@@ -24,16 +24,32 @@ require_once "RunsSQL.php";
 class Administration extends RunsSQL
 {
 
-    public static function createUser($firstName, $middleName, $lastName, $email, $site, $password, $authType = "REGULAR")
+    /**
+     * Creates a user profile in the database, does NOT assign authentication or websites registered
+     * @param $firstName
+     * @param $middleName
+     * @param $lastName
+     * @param $email
+     * @param $site
+     * @param $password
+     * @return bool
+     */
+    public static function createUser($firstName, $middleName, $lastName, $email, $site, $password)
     {
         if (HelperFunctions::isLoggedIn() && HelperFunctions::isUserAuthorized(1)) {
-            return Registration::registerNewUser($firstName, $middleName, $lastName, $email, $site, $password, $authType);
+            return Registration::registerNewUser($firstName, $middleName, $lastName, $email, $site, $password);
         } else {
             return false;
         }
     }
 
 
+    /**
+     * Edits user authentication based on current website.  Returns false if unauthorized.
+     * @param $email
+     * @param $authType
+     * @return bool
+     */
     public static function editUserType($email, $authType)
     {
         if (HelperFunctions::isUserAuthorized(1)) {
@@ -51,13 +67,17 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Adds website registration to user
+     * Adds website registration and their related authentication to a user.  Returns false if unauthorized.
+     * @param $userId
+     * @param $websiteId
+     * @param $userAuth
+     * @return bool
      */
-    public static function editUserAddRegistrationTo($userId, $websiteId)
+    public static function editUserAddRegistrationTo($userId, $websiteId, $userAuth)
     {
         if (HelperFunctions::isUserAuthorized(1)) {
-            $sql = "INSERT INTO user_site_xref (user_id, site_id) VALUES (" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . ");";
-            $execution = parent::runSQLWithTwoClauses($sql, $userId, $websiteId, true);
+            $sql = "INSERT INTO user_site_auth (user_id, site_id) VALUES (" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . ", " . parent::PREPARED_STATEMENT_3 . ");";
+            $execution = parent::runSQLWithThreeClauses($sql, $userId, $websiteId, $userAuth, true);
 
             if ($execution != false) {
                 return $execution;
@@ -70,14 +90,15 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Removes website registration from user
+     * Removes website registration from user.  Returns false if unauthorized.
      * @param $userId
      * @param $websiteId
+     * @return bool
      */
     public static function editUserRemoveRegistrationFrom($userId, $websiteId)
     {
         if (HelperFunctions::isUserAuthorized(1)) {
-            $sql = "DELETE FROM user_site_xref WHERE user_id = " . parent::PREPARED_STATEMENT_1 . " AND site_id = " . parent::PREPARED_STATEMENT_2;
+            $sql = "DELETE FROM user_site_auth WHERE user_id = " . parent::PREPARED_STATEMENT_1 . " AND site_id = " . parent::PREPARED_STATEMENT_2;
             $execution = parent::runSQLWithTwoClauses($sql, $userId, $websiteId, true);
 
             if ($execution != false) {
@@ -91,8 +112,9 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Select lastname, firstname, middlename, email from user with user_id
+     * Select lastname, firstname, middlename, email from user with user_id.  Returns false if unauthorized.
      * @param $userId
+     * @return bool
      */
     public static function getUserWithID($userId)
     {
@@ -112,8 +134,9 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Select lastname, firstname, middlename, user_id from user with email
+     * Select lastname, firstname, middlename, user_id from user with email.  Returns false if unauthorized.
      * @param $userEmail
+     * @return bool
      */
     public static function getUserWithEmail($userEmail)
     {
@@ -133,9 +156,10 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Select lastname, firstname, middlename, email, user_id from user with passed firstname and lastname
+     * Select lastname, firstname, middlename, email, user_id from user with passed firstname and lastname.  Returns false if unauthorized.
      * @param $userFirstName
      * @param $userLastName
+     * @return bool
      */
     public static function getUsersWithFirstAndLastName($userFirstName, $userLastName)
     {
@@ -155,8 +179,9 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Select all users in ascending order whose first name starts with passed letter
+     * Select all users in ascending order whose first name starts with passed letter.  Returns false if unauthorized.
      * @param $searchLetter
+     * @return bool
      */
     public static function getUsersByFirstNameStartingWith($searchLetter)
     {
@@ -176,8 +201,9 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Select all users in ascending order whose last name starts with passed letter
+     * Select all users in ascending order whose last name starts with passed letter.  Returns false if unauthorized.
      * @param $searchLetter
+     * @return bool
      */
     public static function getUsersByLastNameStartingWith($searchLetter)
     {
@@ -196,15 +222,16 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Select all users who are registered to the passed website name
+     * Select all users who are registered to the passed website name.  Returns false if unauthorized.
      * @param $currentWebsite
+     * @return bool
      */
     public static function getUsersRegisteredToThisSite($currentWebsite)
     {
         if (HelperFunctions::isUserAuthorized(1)) {
-            $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id FROM " .
-                "users INNER JOIN users ON users.user_id = user_site_xref.user_id INNER JOIN sites ON " .
-                "sites.site_id = user_site_xref.site_id WHERE site.site_name = " . parent::PREPARED_STATEMENT_1 . " ORDER BY lastname";
+            $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id, user_site_auth.user_auth FROM " .
+                "users INNER JOIN users ON users.user_id = user_site_auth.user_id INNER JOIN sites ON " .
+                "sites.site_id = user_site_auth.site_id WHERE site.site_name = " . parent::PREPARED_STATEMENT_1 . " ORDER BY lastname";
             $execution = parent::runSQLWithOneClause($sql, $currentWebsite, true);
 
             if ($execution != false) {
@@ -218,15 +245,16 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Select all users with passed type.  Unused, field not present in database
+     * Select all users with passed type.  Returns false if unauthorized.
      * @param $userType
+     * @return bool
      */
     public static function getUsersWithType($userType)
     {
         if (HelperFunctions::isUserAuthorized(1)) {
             $sql = "SELECT users.lastname, users.firstname, users.middlename, users.email, users.user_id FROM " .
-                "users INNER JOIN users ON users.user_id = user_auth_xref.user_id INNER JOIN auth ON " .
-                "auth.auth_type = user_auth_xref.auth_type WHERE auth.auth_type = " . parent::PREPARED_STATEMENT_1 . " ORDER BY lastname";
+                "users INNER JOIN users ON users.user_id = user_site_auth.user_id INNER JOIN auth ON " .
+                "auth.auth_type = user_site_auth.user_auth WHERE auth.auth_type = " . parent::PREPARED_STATEMENT_1 . " ORDER BY lastname";
 
             $execution = parent::runSQLWithOneClause($sql, $userType, true);
 
@@ -241,7 +269,8 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Get a list of all websites and their associated ids
+     * Get a list of all websites and their associated ids.  Returns false if unauthorized.
+     * @return bool
      */
     public static function getWebsites()
     {
@@ -260,8 +289,9 @@ class Administration extends RunsSQL
     }
 
     /**
-     * Deletes user with passed user id
+     * Deletes user with passed user id.  Returns false if unauthorized.
      * @param $userId
+     * @return bool
      */
     public static function deleteUserById($userId)
     {
@@ -279,7 +309,12 @@ class Administration extends RunsSQL
         }
     }
 
-
+    /**
+     * Adds a new authentication type with related numerical rank (0 = regular user, 10 = super admin).  Returns false if unauthorized.
+     * @param $newAuthType
+     * @param $rankAssociated
+     * @return bool
+     */
     public static function addNewAuthType($newAuthType, $rankAssociated)
     {
         if (HelperFunctions::isUserAuthorized(1)) {
@@ -304,12 +339,17 @@ class Administration extends RunsSQL
         }
     }
 
+    /**
+     * Deletes selected authentication type.  Returns false if unauthorized.
+     * @param $authType
+     * @return bool
+     */
     public static function deleteAuthType($authType)
     {
         if (HelperFunctions::isUserAuthorized(0)) {
             if ($authType != "SUPER_ADMIN" || $authType != "ADMIN") {
 
-                $sql = "DELETE FROM auth_user_xref WHERE auth_type = " . parent::PREPARED_STATEMENT_1;
+                $sql = "DELETE FROM user_site_auth WHERE user_auth = " . parent::PREPARED_STATEMENT_1;
                 $execution1 = parent::runSQLWithOneClause($sql, $authType, false);
 
                 $sql = "DELETE FROM auth WHERE auth_type = " . parent::PREPARED_STATEMENT_1;
@@ -326,15 +366,20 @@ class Administration extends RunsSQL
         }
     }
 
+    /**
+     * Deletes site name.  Returns false if unauthorized.
+     * @param $siteName
+     * @return bool
+     */
     public static function deleteSite($siteName)
     {
         if (HelperFunctions::isUserAuthorized(1)) {
 
-            $sql = "DELETE FROM user_site_xref WHERE site_name = " . parent::PREPARED_STATEMENT_1;
+            $sql = "DELETE FROM user_site_auth WHERE site_name = " . parent::PREPARED_STATEMENT_1;
             $execution1 = parent::runSQLWithOneClause($sql, $siteName, false);
 
             $sql = "DELETE FROM sites WHERE site_name = " . parent::PREPARED_STATEMENT_1;
-            $execution1 = parent::runSQLWithOneClause($sql, $siteName, false);
+            $execution2 = parent::runSQLWithOneClause($sql, $siteName, false);
 
             if ($execution1 != false && $execution2 != false) {
                 return true;
