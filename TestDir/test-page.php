@@ -9,6 +9,7 @@ session_start();
     //If you're not logged in you are redirected to the login page.
     Authentication::isValidUserElseRedirectTo("index.php");
 
+    $test = "";
     if(isset($_POST["submit"])){
 
         $entry1 = isset($_POST["entry1"]) ? $_POST["entry1"] : "";
@@ -20,7 +21,8 @@ session_start();
         $entry7 = isset($_POST["entry7"]) ? $_POST["entry7"] : "";
 
         //Store your test methods below these comments and pass the entries into the parameters to start tests.
-        Registration::registerNewUser($entry1,$entry2,$entry3,$entry4,$entry5,$entry6,$entry7);
+        $test = Registration::registerNewUser($entry1,$entry2,$entry3,$entry4,$entry5,$entry6,$entry7);
+
 
     }
 
@@ -28,12 +30,10 @@ session_start();
         Authentication::logout();
     }
 
-    function processDataIntoVisualResults($results) {
-
-    }
-
-    $testResults = true ? "<span style='color: green; font-weight: bold'> Test Passed </span>" : "<span style='color: red; font-weight: bold'> Test Failed </span>";
+    $testResults = $test ? "<span style='color: green; font-weight: bold'> Test Passed </span>" : "<span style='color: red; font-weight: bold'> Test Failed </span>";
     $user = isset($_SESSION["auth-current-user"]) ? "<div class='center-align' style='color:#FF6600'> <span style='color:teal; font-weight:bold'>" . $_SESSION["auth-current-user"]->getFirstName() . " " . $_SESSION["auth-current-user"]->getMiddleName() . " " . $_SESSION["auth-current-user"]->getLastName() . "</span> Is Logged In</div> <div class='center-align' style='color:#FF6600'>This user has <span style='color:teal; font-weight:bold'>" . $_SESSION["auth-current-user"]->getAuthType() . "</span> level of authority.</div>" : "<div class='center-align' style='color: red; font-weight: bold'>No One Is Logged In</div>";
+
+echo $test;
 ?>
 
 

@@ -9,7 +9,7 @@
 
                     if(isset($_POST["submit"])){
 
-                        Authentication::login(/*"pk2@gmail.com"*/ $_POST["email"], /*"get2work"*/ $_POST["password"], $siteName);
+                        Authentication::login($_POST["email"], $_POST["password"], $siteName);
                     }
 
                     echo isset($_SESSION["auth-current-user"]) ? $_SESSION["auth-current-user"]->getFirstName() : "No Data";

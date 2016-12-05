@@ -11,7 +11,7 @@ require_once "Database.php";
 require_once "HelperFunctions.php";
 
 /**
- * Class Queryable
+ * Class RunsSQL
  * This class is used to eliminate the redundancy of query statements in the library.
  * Supports up to Six Clauses
  *
@@ -27,6 +27,8 @@ class RunsSQL
     const PREPARED_STATEMENT_4 = ":prepared_4";
     const PREPARED_STATEMENT_5 = ":prepared_5";
     const PREPARED_STATEMENT_6 = ":prepared_6";
+
+    private static $dbErrorMsg;
 
 
     /**
@@ -137,6 +139,14 @@ class RunsSQL
             return self::executeAndReturnColumn($statement);
     }
 
+    protected static function getDBErrorMsg() {
+        if (!empty(self::getDBErrorMsg())){
+            return self::getDBErrorMsg();
+        } else {
+            return "No Database Errors";
+        }
+    }
+
     private static function executeAndReturnColumn($statement){
         $statement->execute();
 
@@ -145,6 +155,7 @@ class RunsSQL
         if ($isThereNoDatabaseErrors) {
             return $statement->fetchColumn();
         } else {
+            self::$dbErrorMsg = $statement->errorInfo()[2];
             return false;
         }
     }
@@ -154,7 +165,7 @@ class RunsSQL
         $statement->execute();
 
         $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
-        echo $statement->errorInfo()[2];
+
         if ($isThereNoDatabaseErrors) {
             if ($isReturnExpected) {
                 $result = $statement->fetch();
@@ -163,6 +174,7 @@ class RunsSQL
                 return true;
             }
         } else {
+            self::$dbErrorMsg = $statement->errorInfo()[2];
             return false;
         }
     }
