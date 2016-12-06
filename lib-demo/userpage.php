@@ -5,6 +5,10 @@ session_start();
 
     Authentication::isValidUserElseRedirectTo("index.php");
 
+if (isset($_POST["password-change"])){
+    Authentication::changePassword( $_POST["old-password"] ,$_POST["new-password"]);
+}
+
 if (isset($_POST["logout"])) {
 
     Authentication::logout("index.php");
@@ -15,21 +19,21 @@ if (isset($_POST["first-name-change"])) {
     CurrentUser::editFirstName($_POST["new-first-name"]);
 
 }
-//
-//if (isset($_POST["password-change"])) {
-//
-//    Authentication::changePassword($_POST["new-password"]);
-//}
-//
-//if (isset($_POST["password-change"])) {
-//
-//    Authentication::changePassword($_POST["new-password"]);
-//}
-//
-//if (isset($_POST["password-change"])) {
-//
-//    Authentication::changePassword($_POST["new-password"]);
-//}
+
+if (isset($_POST["middle-name-change"])) {
+
+    CurrentUser::editMiddleName($_POST["new-middle-name"]);
+}
+
+if (isset($_POST["last-name-change"])) {
+
+    CurrentUser::editLastName($_POST["new-last-name"]);
+}
+
+if (isset($_POST["email-change"])) {
+
+    CurrentUser::editEmail($_POST["new-email"]);
+}
 
 ?>
 <link href="https://fonts.googleapis.com/css?family=Shadows+Into+Light" rel="stylesheet">
@@ -73,7 +77,9 @@ if (isset($_POST["first-name-change"])) {
             </div>
 
             <div class="col s8 offset-s2">
-                <input class="text-input col s8 center-align" type="text" name="new-password">
+
+                <input value="Old Password:" class="text-input col s8 center-align" type="text" name="old-password">
+                <input value="New Password:" class="text-input col s8 center-align" type="text" name="new-password">
                 <input class="btn col s3 offset-s1 pink lighten-2" type="submit" value="Change Password"
                        name="password-change"/>
             </div>

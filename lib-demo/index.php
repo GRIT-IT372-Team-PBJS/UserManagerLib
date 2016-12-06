@@ -18,13 +18,31 @@
     <link rel="stylesheet" href="css/index.css" />
 
                 <div class="row">
-                    <h3 class="center-align">Log In</h3>
-                    <h5 class="center-align"><?php echo $userLoggedIn; ?></h5>
+                    <h3 class="col s12 center-align">How To Prep A Page</h3>
+                    <div class="col s4 offset-s4 card grey lighten-3">
+                        <h6 class="center-align"><u>Code Sample for Page Prep</u></h6>
+                        <?php highlight_file("code-samples/page-prep.php"); ?>
+                    </div>
+
+                    <h3 class="col s12 center-align">Handling the login Session</h3>
+                    <div class="col s4 offset-s4 card grey lighten-3">
+                        <h6 class="center-align"><u>Code Sample for The Login Session</u></h6>
+                        <?php highlight_file("code-samples/login-session.php"); ?>
+                    </div>
+
+                    <h3 class="col s12 center-align">Log In</h3>
+                    <h5 class="col s12 center-align"><?php echo $userLoggedIn; ?></h5>
                     <form action="index.php" method="post">
+
+                        <div class="col s4 offset-s4 card grey lighten-3">
+                            <h6 class="center-align"><u>Code Sample for Logging In</u></h6>
+                            <?php highlight_file("code-samples/login.php"); ?>
+                        </div>
+
                         <div class="card col s4 offset-s4 ">
                             Email: <input type="email" name="email" class="text-input">
                             Password: <input type="password" name="password" class="text-input">
-                            <input class="btn col s10 offset-s1" type="submit" name="submit">
+                            <input class="btn col s10 offset-s1" type="submit" value="Login" name="submit">
                         </div>
                     </form>
 

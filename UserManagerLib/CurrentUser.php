@@ -45,7 +45,7 @@ class CurrentUser extends RunsSQL
 
             self::resetSession($newLastName, "last-name");
 
-            return parent::updateUserData($sql, $newLastName, $_SESSION["auth-current-user"]->getUserId(), false);
+            return parent::runSQLWithTwoClauses($sql, $newLastName, $_SESSION["auth-current-user"]->getUserId(), false);
 
         } else {
             return false;

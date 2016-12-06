@@ -35,11 +35,11 @@ class Registration extends RunsSQL
      * @param string $email email field.
      * @param string $currentSite current site name. This field isn't filled by the user it is set by the developer.
      * @param string $password This field is to create a password for a new user.
-     * @param string $authType authority type field, if you don't add this field it will set a default parameter of "REGULAR". This field isn't filled by the user it is set by the developer.
      * @return Boolean
      */
-    public static function registerNewUser($firstName, $middleName, $lastName, $email, $currentSite, $password, $authType = "REGULAR")
+    public static function registerNewUser($firstName, $middleName, $lastName, $email, $currentSite, $password)
     {
+            $authType = "REGULAR";
 
             if (!HelperFunctions::isUserInDB($email) && HelperFunctions::isAllIncomingDataValid($firstName, $middleName, $lastName, $email, $currentSite, $authType, $password)) {
 
