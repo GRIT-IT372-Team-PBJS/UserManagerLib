@@ -56,7 +56,7 @@ class Authentication extends RunsSQL
                 $hashedPassword = isset($result["password"]) ? $result["password"] : "";
 
                 if (HelperFunctions::isRegisteredToCurrentSite($currentSite, $email)) {
-                    echo "DONE";
+
                     if (password_verify($password, $hashedPassword)) {
 
                         $isAuthParamPassedIn = func_num_args() > 3;
@@ -113,7 +113,7 @@ class Authentication extends RunsSQL
    //sets the current session, the session contains a user object.
     private static function setCurrentUserSession($firstName, $middleName, $lastName, $email, $userId, $type)
     {
-        $_SESSION["auth-current-user"] = new User($firstName, $middleName, $lastName, $email, $userId, $type);
+        $_SESSION["auth-current-user"] = new User($firstName, $lastName, $middleName, $email, $userId, $type);
     }
 
     /**

@@ -139,9 +139,9 @@ class RunsSQL
             return self::executeAndReturnColumn($statement);
     }
 
-    protected static function getDBErrorMsg() {
-        if (!empty(self::getDBErrorMsg())){
-            return self::getDBErrorMsg();
+    public static function getDBErrorMsg() {
+        if (!empty(self::$dbErrorMsg)){
+            return self::$dbErrorMsg;
         } else {
             return "No Database Errors";
         }
@@ -153,6 +153,7 @@ class RunsSQL
         $isThereNoDatabaseErrors = empty($statement->errorInfo()[2]);
 
         if ($isThereNoDatabaseErrors) {
+
             return $statement->fetchColumn();
         } else {
             self::$dbErrorMsg = $statement->errorInfo()[2];

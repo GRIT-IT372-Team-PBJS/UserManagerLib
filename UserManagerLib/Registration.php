@@ -35,7 +35,7 @@ class Registration extends RunsSQL
      * @param string $email email field.
      * @param string $currentSite current site name. This field isn't filled by the user it is set by the developer.
      * @param string $password This field is to create a password for a new user.
-     * @param string $authType authority type field, if you dont add this field it will set a default parameter of "REGULAR". This field isn't filled by the user it is set by the developer.
+     * @param string $authType authority type field, if you don't add this field it will set a default parameter of "REGULAR". This field isn't filled by the user it is set by the developer.
      * @return Boolean
      */
     public static function registerNewUser($firstName, $middleName, $lastName, $email, $currentSite, $password, $authType = "REGULAR")
@@ -47,10 +47,15 @@ class Registration extends RunsSQL
 
                 //checks if none of the DB queries failed while running the sql. If any of them failed return false.
                 if( self::addNewUserToDB($firstName, $middleName, $lastName, $email, $authType, $hashedPassword) &&
-                    self::registerExistingUser($email, $currentSite, $password) &&
                     self::setAuthTypeInDB($email, $authType)){
 
-                    return true;
+                    if (self::registerExistingUser($email, $currentSite, $password)){
+                        return true;
+                    } else {
+
+                        return false;
+                    }
+
                 } else {
                     return false;
                 }
@@ -65,7 +70,7 @@ class Registration extends RunsSQL
         $sql = "INSERT INTO users (firstname, lastname, middlename, email, auth_type, password)
                 VALUES( " . parent::PREPARED_STATEMENT_1 . ",  " . parent::PREPARED_STATEMENT_2 . ", " . parent::PREPARED_STATEMENT_3 . ", " . parent::PREPARED_STATEMENT_4 . ", " . parent::PREPARED_STATEMENT_5 . ", " . parent::PREPARED_STATEMENT_6 . ")";
 
-        return parent::runSQLWithSixClauses($sql, $firstName, $lastName, $middleName, $email, $type, $hashedPassword, $type);
+        return parent::runSQLWithSixClauses($sql, $firstName, $lastName, $middleName, $email, $type, $hashedPassword, false);
 
     }
 
@@ -84,13 +89,16 @@ class Registration extends RunsSQL
      */
     public static function registerExistingUser($email, $currentSite, $password)
     {
+
         if(HelperFunctions::isUserInDB($email) && HelperFunctions::isValidSite($currentSite)) {
 
             $userPasswordInDB = self::fetchUserPasswordFromDB($email);
 
             if ($userPasswordInDB != false) {
 
-                if(password_verify($userPasswordInDB, $password)) {
+                if(password_verify($password, $userPasswordInDB["password"])) {
+
+                    echo "Password was verified";
 
                     $sql = "INSERT INTO user_site_xref (user_id, site_id)
                             VALUES(" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . ")";
@@ -123,7 +131,7 @@ class Registration extends RunsSQL
     private static function setAuthTypeInDB($email, $authType){
 
         $sql = "INSERT INTO user_auth_xref (user_id, auth_type)
-                VALUES(" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . "";
+                VALUES(" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . ")";
 
         $userId = HelperFunctions::getUserId($email);
 
