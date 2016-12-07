@@ -1,0 +1,17 @@
+[06-Dec-2016 18:25:14 America/Chicago] PHP Warning:  require_once(./UserManagementLib/Administration.php): failed to open stream: No such file or directory in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:25:14 America/Chicago] PHP Fatal error:  require_once(): Failed opening required './UserManagementLib/Administration.php' (include_path='.:/opt/php54/lib/php') in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:26:34 America/Chicago] PHP Warning:  require_once(./UserManagemerLib/Administration.php): failed to open stream: No such file or directory in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:26:34 America/Chicago] PHP Fatal error:  require_once(): Failed opening required './UserManagemerLib/Administration.php' (include_path='.:/opt/php54/lib/php') in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:26:50 America/Chicago] PHP Warning:  require_once(/UserManagemerLib/Administration.php): failed to open stream: No such file or directory in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:26:50 America/Chicago] PHP Fatal error:  require_once(): Failed opening required '/UserManagemerLib/Administration.php' (include_path='.:/opt/php54/lib/php') in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:27:00 America/Chicago] PHP Warning:  require_once(./UserManagenerLib/Administration.php): failed to open stream: No such file or directory in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:27:00 America/Chicago] PHP Fatal error:  require_once(): Failed opening required './UserManagenerLib/Administration.php' (include_path='.:/opt/php54/lib/php') in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 18:27:14 America/Chicago] PHP Fatal error:  Call to undefined function createUser() in /home/login/public_html/inserttest.php on line 9
+[06-Dec-2016 18:28:05 America/Chicago] PHP Fatal error:  Call to undefined function createUser() in /home/login/public_html/inserttest.php on line 9
+[06-Dec-2016 19:09:19 America/Chicago] PHP Warning:  require_once(../../UserManagerLib/Authentication.php): failed to open stream: No such file or directory in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 19:09:19 America/Chicago] PHP Fatal error:  require_once(): Failed opening required '../../UserManagerLib/Authentication.php' (include_path='.:/opt/php54/lib/php') in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 19:10:01 America/Chicago] PHP Warning:  require_once(../UserManagerLib/Authentication.php): failed to open stream: No such file or directory in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 19:10:01 America/Chicago] PHP Fatal error:  require_once(): Failed opening required '../UserManagerLib/Authentication.php' (include_path='.:/opt/php54/lib/php') in /home/login/public_html/inserttest.php on line 2
+[06-Dec-2016 19:10:21 America/Chicago] PHP Fatal error:  Call to undefined function createUser() in /home/login/public_html/inserttest.php on line 12
+[06-Dec-2016 19:29:26 America/Chicago] PHP Fatal error:  Call to undefined function password_hash() in /home/login/public_html/UserManagerLib/Registration.php on line 46
+[06-Dec-2016 19:31:39 America/Chicago] PHP Fatal error:  Call to undefined function password_hash() in /home/login/public_html/UserManagerLib/Registration.php on line 46

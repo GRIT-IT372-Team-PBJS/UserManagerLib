@@ -1,0 +1,9 @@
+[06-Dec-2016 18:47:47 America/Chicago] PHP Fatal error:  Call to a member function prepare() on a non-object in /home/login/public_html/UserManagerLib/RunsSQL.php on line 127
+[06-Dec-2016 18:50:48 America/Chicago] PHP Fatal error:  Call to a member function prepare() on a non-object in /home/login/public_html/UserManagerLib/RunsSQL.php on line 127
+[06-Dec-2016 18:50:53 America/Chicago] PHP Fatal error:  Call to a member function prepare() on a non-object in /home/login/public_html/UserManagerLib/RunsSQL.php on line 127
+[06-Dec-2016 18:56:54 America/Chicago] PHP Fatal error:  Call to a member function prepare() on a non-object in /home/login/public_html/UserManagerLib/RunsSQL.php on line 127
+[06-Dec-2016 19:26:22 America/Chicago] PHP Fatal error:  Call to undefined function password_hash() in /home/login/public_html/UserManagerLib/Registration.php on line 46
+[06-Dec-2016 19:28:24 America/Chicago] PHP Fatal error:  Call to undefined function password_hash() in /home/login/public_html/UserManagerLib/Registration.php on line 46
+[06-Dec-2016 19:31:44 America/Chicago] PHP Fatal error:  Call to undefined function password_hash() in /home/login/public_html/UserManagerLib/Registration.php on line 46
+[06-Dec-2016 19:34:40 America/Chicago] PHP Fatal error:  Call to undefined function password_verify() in /home/login/public_html/UserManagerLib/Authentication.php on line 60
+[06-Dec-2016 19:42:09 America/Chicago] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/login/public_html/UserManagerLib/Registration.php:101) in /home/login/public_html/lib-demo/registration.php on line 13

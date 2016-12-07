@@ -98,8 +98,6 @@ class Registration extends RunsSQL
 
                 if(password_verify($password, $userPasswordInDB["password"])) {
 
-                    echo "Password was verified";
-
                     $sql = "INSERT INTO user_site_xref (user_id, site_id)
                             VALUES(" . parent::PREPARED_STATEMENT_1 . ", " . parent::PREPARED_STATEMENT_2 . ")";
 
